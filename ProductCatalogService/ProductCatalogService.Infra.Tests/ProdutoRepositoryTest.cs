@@ -1,6 +1,4 @@
 ﻿using ProductCatalogService.Domain.Entities;
-using Moq;
-using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Infra.Repositories;
 using Newtonsoft.Json;
 using ProductCatalogService.Infra.Data;
@@ -16,9 +14,8 @@ namespace ProductCatalogService.Infra.Tests
         public ProdutoRepositoryTest()
         {
             var options = new DbContextOptionsBuilder<ConfigDataBase>()
-                .UseInMemoryDatabase(databaseName: "ProdutoTesteDb")
-                .Options;
-
+                    .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                    .Options;
             _context = new ConfigDataBase(options);
         }
 

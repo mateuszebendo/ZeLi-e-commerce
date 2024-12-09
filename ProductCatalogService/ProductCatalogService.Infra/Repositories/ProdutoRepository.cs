@@ -1,4 +1,5 @@
-﻿using ProductCatalogService.Domain.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
+using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Domain.Entities;
 using ProductCatalogService.Infra.Data;
 
@@ -6,18 +7,18 @@ namespace ProductCatalogService.Infra.Repositories
 {
     public class ProdutoRepository : IProdutoRepository
     {
-        private readonly ConfigDataBase _config;
+        private readonly ConfigDataBase _context;
 
-        public ProdutoRepository(ConfigDataBase config) 
+        public ProdutoRepository(ConfigDataBase context) 
         {
-            _config = config;
+            _context = context;
         }
         public async Task<Produto> Post(Produto produto)
         {
             try
             {
-                _config.Add(produto);
-                await _config.SaveChangesAsync();
+                _context.Add(produto);
+                await _context.SaveChangesAsync();
                 return produto;
             }
             catch (Exception ex)
@@ -25,25 +26,79 @@ namespace ProductCatalogService.Infra.Repositories
                 throw new Exception("SQL error: " + ex.Message);
             }
         }
-
-        public Task<bool> Delete(int id)
+        public async Task<List<Produto>> GetAll()
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Produtos.ToListAsync<Produto>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("SQL error: " + ex.Message);
+            }
         }
 
-        public Task<List<Produto>> GetAll()
+        public async  Task<Produto> GetById(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Produtos.
+                    FirstOrDefaultAsync<Produto>(p => p.ProdutoID == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("SQL error: " + ex.Message);
+            }
         }
 
-        public Task<Produto> GetById(int id)
+        public async Task<Produto> Put(Produto produtoAtualizado, int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var produtoExistente = await _context.Produtos
+                    .Include(p => p.Categoria) // garante que a categoria seja carregada
+                    .FirstOrDefaultAsync(p => p.ProdutoID == id);
+
+                // Ajusta a chave primária do produto
+                produtoAtualizado.ProdutoID = produtoExistente.ProdutoID;
+
+                // Ajusta a chave estrangeira da categoria
+                // Somente se o Produto tiver a propriedade CategoriaID:
+                produtoAtualizado.Categoria.CategoriaID = produtoExistente.Categoria.CategoriaID;
+
+                // Caso não tenha a propriedade CategoriaID, então ajuste diretamente no objeto:
+                // produtoAtualizado.Categoria.CategoriaID = produtoExistente.Categoria.CategoriaID;
+
+                _context.Entry(produtoExistente).CurrentValues.SetValues(produtoAtualizado);
+
+                await _context.SaveChangesAsync();
+
+                return produtoExistente;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("SQL error: " + ex.Message);
+            }
         }
 
-        public Task<Produto> Put(Produto produto, int id)
+
+        public async Task<bool> Delete(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var produto = await _context.Produtos
+                    .FirstOrDefaultAsync<Produto>(p => p.ProdutoID == id);
+
+                _context.Produtos.Remove(produto);
+
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("SQL error: " + ex.Message);
+            }
         }
 
     }
