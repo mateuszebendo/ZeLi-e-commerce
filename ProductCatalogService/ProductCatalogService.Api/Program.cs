@@ -1,8 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+using ProductCatalogService.Infra.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddDbContextPool<ConfigDataBase>(opt =>
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DatabaseConnectionString")
+));
 
 var app = builder.Build();
 
