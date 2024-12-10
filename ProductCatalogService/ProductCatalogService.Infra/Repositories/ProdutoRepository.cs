@@ -40,7 +40,6 @@ namespace ProductCatalogService.Infra.Repositories
                 var produtos = await _context.Produtos.ToListAsync<Produto>();
 
                 return produtos;
-
             }
             catch (Exception ex)
             {

@@ -1,4 +1,5 @@
-﻿using ProductCatalogService.Domain.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
+using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Domain.Entities;
 using ProductCatalogService.Infra.Data;
 
@@ -13,29 +14,103 @@ namespace ProductCatalogService.Infra.Repositories
             _context = context;
         }
 
-        public Task<bool> Delete(int id)
+        public async Task<Categoria> Post(Categoria categoria)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if ( categoria == null)
+                    throw new ArgumentNullException(nameof( categoria));
+
+                _context.Add( categoria);
+                await _context.SaveChangesAsync();
+                return  categoria;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new DbUpdateException("Ocorreu um erro ao inserir o  categoria.", dbEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro interno ao salvar o  categoria.", ex);
+            }
         }
 
-        public Task<List<Categoria>> GetAll()
+        public async Task<List<Categoria>> GetAll()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var categorias = await _context.Categorias.ToListAsync<Categoria>();
+
+                return categorias;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro interno ao recuperar os  categorias.", ex);
+            }
         }
 
-        public Task<Categoria> GetById(int id)
+        public async Task<Categoria> GetById(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var  categoria = await _context. Categorias
+                    .FirstOrDefaultAsync<Categoria>(c => c.CategoriaID == id);
+
+                if ( categoria == null)
+                    throw new ArgumentException(" categoria não existente");
+
+                return  categoria;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro interno ao recuperar o  categoria.", ex);
+            }
         }
 
-        public Task<Categoria> Post(Categoria Categoria)
+        public async Task<Categoria> Put(Categoria categoriaAtualizada, int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                categoriaAtualizada.CategoriaID = id;
+
+                var categoriaExistente = await _context.Categorias
+                    .FirstOrDefaultAsync(p => p.CategoriaID == categoriaAtualizada.CategoriaID);
+
+                if (categoriaExistente == null)
+                {
+                    throw new KeyNotFoundException("Categoria não encontrado.");
+                }
+
+                categoriaExistente.Nome = categoriaAtualizada.Nome;
+                categoriaExistente.Descricao = categoriaAtualizada.Descricao;
+
+                await _context.SaveChangesAsync();
+
+                return categoriaExistente;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("SQL error: " + ex.Message);
+            }
         }
 
-        public Task<Categoria> Put(Categoria Categoria, int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var categoria = await _context.Categorias
+                    .FirstOrDefaultAsync<Categoria>(c => c.CategoriaID == id);
+
+                categoria.Ativo = false;
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("SQL error: " + ex.Message);
+            }
         }
+
     }
 }

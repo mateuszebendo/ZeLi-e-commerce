@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using ProductCatalogService.Domain.Entities;
 using ProductCatalogService.Infra.Data;
 using ProductCatalogService.Infra.Repositories;
@@ -43,7 +42,7 @@ namespace ProductCatalogService.Infra.Tests
         }
 
         [Fact]
-        public async Task RecuperaCategorias_Deve_Retornar_Todas_Categorias()
+        public async Task ObterCategorias_Deve_Retornar_Todas_Categorias()
         {
             //Arrange
             var categorias = new List<Categoria>
@@ -86,6 +85,7 @@ namespace ProductCatalogService.Infra.Tests
             }
         }
 
+        [Fact]
         public async Task ObterCategoriaPorId_QuandoIdExistente_DeveRetornarCategoria()
         {
             //Arrange
@@ -109,16 +109,54 @@ namespace ProductCatalogService.Infra.Tests
             Assert.Equal(categoria.Descricao, getByIdResult.Descricao);
         }
 
-        public async Task AtualizarCategoria_QuandoDadosValidos_DeveRetornarCategoriaAtualizadoIgualObjetoEnviado()
+        [Fact]
+        public async Task AtualizaCategoria_QuandoDadosValidos_DeveRetornarCategoriaAtualizadaIgualObjetoEnviado()
         {
             //Arrange 
-            Categoria categoriaOriginal = new Categoria
+            Categoria categoria = new Categoria
             {
                 Nome = "Eletrônicos",
                 Descricao = "Descricao"
             };
 
-            
+            _context.Add(categoria);
+            await _context.SaveChangesAsync();
+
+            CategoriaRepository categoriaRepository = new CategoriaRepository(_context);
+
+            categoria.Nome = "Chinelos";
+
+            //Act
+            Categoria? categoriaAtualizada = await categoriaRepository.Put(categoria, categoria.CategoriaID);
+
+            //Assert 
+            Assert.NotNull(categoriaAtualizada);
+
+            Assert.Equal("Chinelos", categoria.Nome);
+        }
+
+        [Fact]
+        public async Task DeletaCategoria_QuandoDeletada_RetornaTrueENaoEncontraNoBanco()
+        {
+            //Arrange
+            Categoria categoria = new Categoria
+            {
+                Nome = "Eletrônicos",
+                Descricao = "Descricao"
+            };
+
+            _context.Add(categoria);
+            await _context.SaveChangesAsync();
+
+            CategoriaRepository categoriaRepository = new CategoriaRepository(_context);
+
+            //Act 
+            Nullable<bool> deleteReturn = await categoriaRepository.Delete(categoria.CategoriaID);
+            var ex = await Assert.ThrowsAsync<Exception>(() => categoriaRepository.GetById(1));
+
+            //Assert
+            Assert.True(deleteReturn);
+            Assert.Equal(typeof(Exception), ex.GetType());
         }
     }
 }
