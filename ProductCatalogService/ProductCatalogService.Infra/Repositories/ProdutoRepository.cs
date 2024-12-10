@@ -17,24 +17,34 @@ namespace ProductCatalogService.Infra.Repositories
         {
             try
             {
+                if(produto == null)
+                    throw new ArgumentNullException(nameof(produto));
+
                 _context.Add(produto);
                 await _context.SaveChangesAsync();
                 return produto;
             }
+            catch (DbUpdateException dbEx)
+            {
+                throw new DbUpdateException("Ocorreu um erro ao inserir o produto.", dbEx);
+            }
             catch (Exception ex)
             {
-                throw new Exception("SQL error: " + ex.Message);
+                throw new Exception("Erro interno ao salvar o produto.", ex);
             }
         }
         public async Task<List<Produto>> GetAll()
         {
             try
             {
-                return await _context.Produtos.ToListAsync<Produto>();
+                var produtos = await _context.Produtos.ToListAsync<Produto>();
+
+                return produtos;
+
             }
             catch (Exception ex)
             {
-                throw new Exception("SQL error: " + ex.Message);
+                throw new Exception("Erro interno ao recuperar os produtos.", ex);
             }
         }
 
@@ -42,12 +52,17 @@ namespace ProductCatalogService.Infra.Repositories
         {
             try
             {
-                return await _context.Produtos.
-                    FirstOrDefaultAsync<Produto>(p => p.ProdutoID == id);
+                var produto = await _context.Produtos
+                    .FirstOrDefaultAsync<Produto>(p => p.ProdutoID == id);
+
+                if (produto == null)
+                    throw new ArgumentException("Produto não existente");
+
+                return produto;
             }
             catch (Exception ex)
             {
-                throw new Exception("SQL error: " + ex.Message);
+                throw new Exception("Erro interno ao recuperar o produto.", ex);
             }
         }
 
@@ -55,21 +70,23 @@ namespace ProductCatalogService.Infra.Repositories
         {
             try
             {
+                produtoAtualizado.ProdutoID = id;
+
                 var produtoExistente = await _context.Produtos
-                    .Include(p => p.Categoria) // garante que a categoria seja carregada
-                    .FirstOrDefaultAsync(p => p.ProdutoID == id);
+                    .Include(p => p.Categoria)
+                    .FirstOrDefaultAsync(p => p.ProdutoID == produtoAtualizado.ProdutoID);
 
-                // Ajusta a chave primária do produto
-                produtoAtualizado.ProdutoID = produtoExistente.ProdutoID;
+                if (produtoExistente == null)
+                {
+                    throw new KeyNotFoundException("Produto não encontrado.");
+                }
 
-                // Ajusta a chave estrangeira da categoria
-                // Somente se o Produto tiver a propriedade CategoriaID:
-                produtoAtualizado.Categoria.CategoriaID = produtoExistente.Categoria.CategoriaID;
-
-                // Caso não tenha a propriedade CategoriaID, então ajuste diretamente no objeto:
-                // produtoAtualizado.Categoria.CategoriaID = produtoExistente.Categoria.CategoriaID;
-
-                _context.Entry(produtoExistente).CurrentValues.SetValues(produtoAtualizado);
+                produtoExistente.Nome = produtoAtualizado.Nome;
+                produtoExistente.Descricao = produtoAtualizado.Descricao;
+                produtoExistente.Preco = produtoAtualizado.Preco;
+                produtoExistente.ImagemURL = produtoAtualizado.ImagemURL;
+                produtoExistente.Categoria = produtoAtualizado.Categoria;
+                produtoExistente.Estoque = produtoAtualizado.Estoque;
 
                 await _context.SaveChangesAsync();
 
@@ -81,7 +98,6 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-
         public async Task<bool> Delete(int id)
         {
             try
@@ -89,8 +105,7 @@ namespace ProductCatalogService.Infra.Repositories
                 var produto = await _context.Produtos
                     .FirstOrDefaultAsync<Produto>(p => p.ProdutoID == id);
 
-                _context.Produtos.Remove(produto);
-
+                produto.Ativo = false;
                 await _context.SaveChangesAsync();
 
                 return true;

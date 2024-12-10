@@ -4,10 +4,10 @@ namespace ProductCatalogService.Domain.Contracts
 {
     public interface ICategoriaRepository
     {
-        Categoria Post(Categoria Categoria);
-        Categoria GetById(int id);
-        Categoria GetAll();
-        Categoria Put(Categoria Categoria, int id);
-        bool Delete(int id);
+        Task<Categoria> Post(Categoria Categoria);
+        Task<Categoria> GetById(int id);
+        Task<List<Categoria>> GetAll();
+        Task<Categoria> Put(Categoria Categoria, int id);
+        Task<bool> Delete(int id);
     }
 }

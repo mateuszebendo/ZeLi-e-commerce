@@ -11,5 +11,6 @@ namespace ProductCatalogService.Domain.Entities
         public int CategoriaID { get; set; }
         public String Nome { get; set; }
         public String Descricao { get; set; }
+        public Boolean Ativo { get; set; } = true;
     }
 }

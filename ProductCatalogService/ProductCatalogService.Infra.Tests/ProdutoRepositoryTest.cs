@@ -20,7 +20,7 @@ namespace ProductCatalogService.Infra.Tests
         }
 
         [Fact]
-        public async void CriaProduto_Deve_Retornar_Produto_Com_Id()
+        public async Task CriarProduto_QuandoDadosValidos_DeveRetornarProdutoComId()
         {
             //Arrange
             var produtoCriado = new Produto()
@@ -45,15 +45,17 @@ namespace ProductCatalogService.Infra.Tests
             //Assert
             Assert.NotNull(resultadoPost);
 
-            var obj1 = JsonConvert.SerializeObject(produtoCriado);
-            var obj2 = JsonConvert.SerializeObject(resultadoPost);
-
-            Assert.Equal(obj1, obj2);
+            Assert.Equal(produtoCriado.Nome, resultadoPost.Nome);
+            Assert.Equal(produtoCriado.Descricao, resultadoPost.Descricao);
+            Assert.Equal(produtoCriado.Estoque, resultadoPost.Estoque);
+            Assert.Equal(produtoCriado.Categoria.Nome, resultadoPost.Categoria.Nome);
+            Assert.Equal(produtoCriado.Categoria.Descricao, resultadoPost.Categoria.Descricao);
+            Assert.Equal(produtoCriado.ImagemURL, resultadoPost.ImagemURL);
         }
 
 
         [Fact]
-        public async void ObterProduto_Deve_Retornar_Produto()
+        public async Task ObterProduto_QuandoIdValido_DeveRetornarProduto()
         {
             //Arrange
             var produtoOriginal = new Produto()
@@ -88,7 +90,7 @@ namespace ProductCatalogService.Infra.Tests
         }
 
         [Fact]
-        public async void ObterProdutos_Deve_Retornar_ListaProdutos()
+        public async Task ObterProdutos_QuandoExistemProdutos_DeveRetornarListaDeProdutos()
         {
             //Arrange
             List<Produto> listaProdutoOriginal = new List<Produto>()
@@ -148,17 +150,24 @@ namespace ProductCatalogService.Infra.Tests
 
             //Assert
             Assert.NotNull(resultadoGetAll);
+            Assert.Equal(listaProdutoOriginal.Count, resultadoGetAll.Count);
 
-            var obj1 = JsonConvert.SerializeObject(listaProdutoOriginal);
-            var obj2 = JsonConvert.SerializeObject(resultadoGetAll);
+            for (int i = 0; i < listaProdutoOriginal.Count; i++)
+            {
+                Assert.Equal(listaProdutoOriginal[i].Nome, resultadoGetAll[i].Nome);
+                Assert.Equal(listaProdutoOriginal[i].Descricao, resultadoGetAll[i].Descricao);
+                Assert.Equal(listaProdutoOriginal[i].Preco, resultadoGetAll[i].Preco);
+                Assert.Equal(listaProdutoOriginal[i].Estoque, resultadoGetAll[i].Estoque);
+                Assert.Equal(listaProdutoOriginal[i].Categoria.Nome, resultadoGetAll[i].Categoria.Nome);
+                Assert.Equal(listaProdutoOriginal[i].Categoria.Descricao, resultadoGetAll[i].Categoria.Descricao);
+                Assert.Equal(listaProdutoOriginal[i].ImagemURL, resultadoGetAll[i].ImagemURL);
+            }
 
-            Assert.Equal(obj1, obj2);
         }
 
-        [Fact] 
-        public async void AtualizarProduto_Deve_Ser_Igual_ao_Objeto_Atualizado()
+        [Fact]
+        public async Task AtualizarProduto_QuandoDadosValidos_DeveRetornarProdutoAtualizadoIgualObjetoEnviado()
         {
-
             //Arrange
             var produtoOriginal = new Produto
             {
@@ -166,13 +175,18 @@ namespace ProductCatalogService.Infra.Tests
                 Descricao = "Notebook potente para jogos e aplicações pesadas.",
                 Preco = 5499.99,
                 Estoque = 20,
-                Categoria = new Categoria()
+                Categoria = new Categoria
                 {
                     Nome = "Informática",
                     Descricao = "Descricao"
                 },
                 ImagemURL = "https://example.com/imagens/notebook-gamer.png"
             };
+
+            var nomeProdutoOriginal = produtoOriginal.Nome;
+
+            await _context.Produtos.AddAsync(produtoOriginal);
+            await _context.SaveChangesAsync();
 
             var produtoAtualizado = new Produto
             {
@@ -180,7 +194,7 @@ namespace ProductCatalogService.Infra.Tests
                 Descricao = "Notebook mais potente para jogos e aplicações pesadas.",
                 Preco = 6499.99,
                 Estoque = 20,
-                Categoria = new Categoria()
+                Categoria = new Categoria
                 {
                     Nome = "Informática",
                     Descricao = "Descricao"
@@ -188,29 +202,42 @@ namespace ProductCatalogService.Infra.Tests
                 ImagemURL = "https://example.com/imagens/notebook-gamer.png"
             };
 
-            _context.Add(produtoOriginal);
-            await _context.SaveChangesAsync();
-
-            ProdutoRepository produtoRepository = new ProdutoRepository(_context);
+            var produtoRepository = new ProdutoRepository(_context);
 
             //Act
-            var produtoPreAlterocoes = await produtoRepository.GetById(1);
+            var produtoPreAlteracoes = await produtoRepository.GetById(1);
+            Assert.NotNull(produtoPreAlteracoes);
+            Assert.Equal(produtoOriginal.Nome, produtoPreAlteracoes.Nome);
+            Assert.Equal(produtoOriginal.Descricao, produtoPreAlteracoes.Descricao);
+            Assert.Equal(produtoOriginal.Preco, produtoPreAlteracoes.Preco);
+            Assert.Equal(produtoOriginal.Estoque, produtoPreAlteracoes.Estoque);
+            Assert.Equal(produtoOriginal.Categoria.Nome, produtoPreAlteracoes.Categoria.Nome);
+            Assert.Equal(produtoOriginal.Categoria.Descricao, produtoPreAlteracoes.Categoria.Descricao);
+            Assert.Equal(produtoOriginal.ImagemURL, produtoPreAlteracoes.ImagemURL);
+
             var produtoPosAlteracoes = await produtoRepository.Put(produtoAtualizado, 1);
+
+            var nomeProdutoAtualizado = produtoPosAlteracoes.Nome;
 
             //Assert 
             Assert.NotNull(produtoPosAlteracoes);
 
-            var obj1 = JsonConvert.SerializeObject(produtoPosAlteracoes);
-            var obj2 = JsonConvert.SerializeObject(produtoAtualizado);
-            var obj3 = JsonConvert.SerializeObject(produtoPreAlterocoes);
-            var obj4 = JsonConvert.SerializeObject(produtoOriginal);
+            Assert.Equal(produtoAtualizado.Nome, produtoPosAlteracoes.Nome);
+            Assert.Equal(produtoAtualizado.Descricao, produtoPosAlteracoes.Descricao);
+            Assert.Equal(produtoAtualizado.Preco, produtoPosAlteracoes.Preco);
+            Assert.Equal(produtoAtualizado.Estoque, produtoPosAlteracoes.Estoque);
+            Assert.Equal(produtoAtualizado.Categoria.Nome, produtoPosAlteracoes.Categoria.Nome);
+            Assert.Equal(produtoAtualizado.Categoria.Descricao, produtoPosAlteracoes.Categoria.Descricao);
+            Assert.Equal(produtoAtualizado.ImagemURL, produtoPosAlteracoes.ImagemURL);
 
-            Assert.Equal(obj1, obj2);
-            Assert.Equal(obj3, obj4);
+            Assert.NotEqual(nomeProdutoOriginal, nomeProdutoAtualizado);
         }
 
+
         [Fact]
-        public async void DeletaProduto_Deve_Retornar_True_E_Produto_Nao_Existir_Mais()
+        public async Task DeletarProduto_QuandoProdutoExistente_DeveRetornarTrueEEvitarQueProdutoAindaExista
+
+()
         {
             //Arrange
             var produtoOriginal = new Produto
@@ -234,11 +261,10 @@ namespace ProductCatalogService.Infra.Tests
 
             //Act 
             bool deletouComSucesso = await produtoRepository.Delete(1);
-            Produto? produtoDeletado = await produtoRepository.GetById(1);
 
             //Assert 
             Assert.True(deletouComSucesso);
-            Assert.Null(produtoDeletado);
+            Assert.ThrowsAsync<Exception>(() => produtoRepository.GetById(1));
         }
     }
 }

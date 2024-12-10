@@ -15,5 +15,6 @@ namespace ProductCatalogService.Domain.Entities
         public Double Estoque { get; set; }
         public Categoria Categoria { get; set; }
         public String ImagemURL { get; set; }
+        public Boolean Ativo { get; set; } = true;
     }
 }
