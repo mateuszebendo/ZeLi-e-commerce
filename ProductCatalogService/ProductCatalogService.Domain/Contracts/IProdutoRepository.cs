@@ -4,10 +4,10 @@ namespace ProductCatalogService.Domain.Contracts
 {
     public interface IProdutoRepository
     {
-        Task<Produto> Post(Produto produto);
-        Task<Produto> GetById(int id);
-        Task<List<Produto>> GetAll();
-        Task<Produto> Put(Produto produto, int id);
-        Task<bool> Delete(int id);
+        Task<Produto> AddAsync(Produto produto);
+        Task<Produto> GetByIdAsync(int id);
+        Task<List<Produto>> GetAllAsync();
+        Task<Produto> UpdateAsync(Produto produto, int id);
+        Task<bool> RemoveAsync(int id);
     }
 }

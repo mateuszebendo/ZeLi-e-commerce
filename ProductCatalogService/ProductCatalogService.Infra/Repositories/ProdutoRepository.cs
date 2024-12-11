@@ -13,7 +13,7 @@ namespace ProductCatalogService.Infra.Repositories
         {
             _context = context;
         }
-        public async Task<Produto> Post(Produto produto)
+        public async Task<Produto> AddAsync(Produto produto)
         {
             try
             {
@@ -33,7 +33,7 @@ namespace ProductCatalogService.Infra.Repositories
                 throw new Exception("Erro interno ao salvar o produto.", ex);
             }
         }
-        public async Task<List<Produto>> GetAll()
+        public async Task<List<Produto>> GetAllAsync()
         {
             try
             {
@@ -47,7 +47,7 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async  Task<Produto> GetById(int id)
+        public async  Task<Produto> GetByIdAsync(int id)
         {
             try
             {
@@ -65,27 +65,29 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async Task<Produto> Put(Produto produtoAtualizado, int id)
+        public async Task<Produto> UpdateAsync(Produto produtoAtualizado, int id)
         {
             try
             {
-                produtoAtualizado.ProdutoID = id;
-
                 var produtoExistente = await _context.Produtos
                     .Include(p => p.Categoria)
-                    .FirstOrDefaultAsync(p => p.ProdutoID == produtoAtualizado.ProdutoID);
+                    .FirstOrDefaultAsync(p => p.ProdutoID == id);
 
                 if (produtoExistente == null)
                 {
                     throw new KeyNotFoundException("Produto não encontrado.");
                 }
 
-                produtoExistente.Nome = produtoAtualizado.Nome;
-                produtoExistente.Descricao = produtoAtualizado.Descricao;
-                produtoExistente.Preco = produtoAtualizado.Preco;
-                produtoExistente.ImagemURL = produtoAtualizado.ImagemURL;
+                produtoExistente.Update(
+                produtoAtualizado.Nome,
+                produtoAtualizado.Descricao,
+                produtoAtualizado.Preco,
+                produtoAtualizado.Estoque,
+                produtoAtualizado.CategoriaId,
+                produtoAtualizado.ImagemURL
+                );
+
                 produtoExistente.Categoria = produtoAtualizado.Categoria;
-                produtoExistente.Estoque = produtoAtualizado.Estoque;
 
                 await _context.SaveChangesAsync();
 
@@ -97,7 +99,7 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> RemoveAsync(int id)
         {
             try
             {

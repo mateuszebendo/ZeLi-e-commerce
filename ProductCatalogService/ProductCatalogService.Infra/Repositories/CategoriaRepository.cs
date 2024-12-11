@@ -14,7 +14,7 @@ namespace ProductCatalogService.Infra.Repositories
             _context = context;
         }
 
-        public async Task<Categoria> Post(Categoria categoria)
+        public async Task<Categoria> AddAsync(Categoria categoria)
         {
             try
             {
@@ -35,7 +35,7 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async Task<List<Categoria>> GetAll()
+        public async Task<List<Categoria>> GetAllAsync()
         {
             try
             {
@@ -49,7 +49,7 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async Task<Categoria> GetById(int id)
+        public async Task<Categoria> GetByIdAsync(int id)
         {
             try
             {
@@ -67,12 +67,10 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async Task<Categoria> Put(Categoria categoriaAtualizada, int id)
+        public async Task<Categoria> UpdateAsync(Categoria categoriaAtualizada, int id)
         {
             try
             {
-                categoriaAtualizada.CategoriaID = id;
-
                 var categoriaExistente = await _context.Categorias
                     .FirstOrDefaultAsync(p => p.CategoriaID == categoriaAtualizada.CategoriaID);
 
@@ -81,8 +79,7 @@ namespace ProductCatalogService.Infra.Repositories
                     throw new KeyNotFoundException("Categoria não encontrado.");
                 }
 
-                categoriaExistente.Nome = categoriaAtualizada.Nome;
-                categoriaExistente.Descricao = categoriaAtualizada.Descricao;
+                categoriaExistente.Update(categoriaAtualizada.Nome, categoriaAtualizada.Descricao);
 
                 await _context.SaveChangesAsync();
 
@@ -94,7 +91,7 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> RemoveAsync(int id)
         {
             try
             {
