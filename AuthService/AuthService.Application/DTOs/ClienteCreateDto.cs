@@ -22,4 +22,11 @@ public class ClienteCreateDto
     [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$",
     ErrorMessage = "Senha inválida. A senha deve ter no mínimo 8 caracteres, contendo pelo menos uma letra maiúscula, um numero e um caractere especial.")]
     public string Senha { get; set; }
+
+    public ClienteCreateDto(string nome, string email, string senha)
+    {
+        Nome = nome;
+        Email = email;
+        Senha = senha;
+    }
 }

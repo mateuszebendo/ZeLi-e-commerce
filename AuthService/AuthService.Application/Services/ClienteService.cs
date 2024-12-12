@@ -15,13 +15,11 @@ namespace AuthService.Application.Services;
 public class ClienteService : IClienteService
 {
     private readonly IClienteRepository _clienteRepository;
-    private readonly Context _context;
     private readonly IMapper _mapper;
 
-    public ClienteService(IClienteRepository clienteRepository, Context context, IMapper  mapper)
+    public ClienteService(IClienteRepository clienteRepository, IMapper  mapper)
     {
         _clienteRepository = clienteRepository;
-        _context = context;
         _mapper = mapper;
     }
 
@@ -40,12 +38,13 @@ public class ClienteService : IClienteService
         return clienteDto;
     }
 
-    public async Task<IEnumerable<Cliente>> GetAllClientesAsync()
+    public async Task<IEnumerable<ClienteDto>> GetAllClientesAsync()
     {
-        throw new NotImplementedException();
+        var clientesEntity = await _clienteRepository.GetAllClientesAsync();
+        return _mapper.Map<IEnumerable<ClienteDto>>(clientesEntity);
     }
 
-    public async Task<Cliente> GetClienteByIdAsync(int id)
+    public async Task<ClienteDto> GetClienteByIdAsync(int id)
     {
         throw new NotImplementedException();
     }

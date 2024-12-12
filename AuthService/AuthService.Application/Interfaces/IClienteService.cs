@@ -11,8 +11,8 @@ namespace AuthService.Application.Interfaces;
 public interface IClienteService
 {
     Task<ClienteDto> CreateClienteAsync(ClienteCreateDto clienteCreateDto);
-    Task<IEnumerable<Cliente>> GetAllClientesAsync();
-    Task<Cliente> GetClienteByIdAsync(int id);
+    Task<IEnumerable<ClienteDto>> GetAllClientesAsync();
+    Task<ClienteDto> GetClienteByIdAsync(int id);
     Task<Cliente> GetClienteByEmailAsync(string email);
     Task<Cliente> UpdateCliente(Cliente cliente, int id);
     Task<bool> UpdateSenha(int id, string novaSenha);

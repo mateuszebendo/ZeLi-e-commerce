@@ -10,12 +10,12 @@ namespace AuthService.Domain.Entities;
 
 public class Cliente
 {   
-    public int ClienteId { get; private set; }
-    public string Nome { get; private set; }
-    public string Email { get; private set; }
-    public string Senha { get;  private set; }
-    public DateTime DataCadastro { get;  private set; }
-    public bool Ativo { get; private set; }
+    public int ClienteId { get; set; }
+    public string Nome { get;  set; }
+    public string Email { get; set; }
+    public string Senha { get; set; }
+    public DateTime DataCadastro { get; set; }
+    public bool Ativo { get; set; }
 
     //public ICollection<Endereco> Enderecos { get; private set; }
     //public ICollection<Carrinho> Carrinho  {get; private set; }
@@ -37,13 +37,13 @@ public class Cliente
         DomainExceptionValidation.When(nomeInvalido,
             "Nome inválido. O nome não pode conter números ou caracteres especiais");
 
-        bool emailInvalido = !EmailRegex.IsMatch(nome);
+        bool emailInvalido = !EmailRegex.IsMatch(email);
 
         DomainExceptionValidation.When(string.IsNullOrEmpty(email), "Email inválido. O nome é obrigatório");
         DomainExceptionValidation.When(emailInvalido,
             "Email invalido");
 
-        bool senhaInvalido = !EmailRegex.IsMatch(nome);
+        bool senhaInvalido = !SenhaRegex.IsMatch(senha);
 
         DomainExceptionValidation.When(senhaInvalido,
             "Senha invalida. A senha deve contar no minimo 8 caracteres, um Letra Maiuscula, um numero e um caracter especial");

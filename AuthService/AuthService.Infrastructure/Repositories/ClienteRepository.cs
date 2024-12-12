@@ -1,6 +1,6 @@
 ﻿using AuthService.Domain.Entities;
 using AuthService.Infrastructure.Data;
-using AuthService.Infrastructure.Interfaces;
+using AuthService.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -29,15 +29,10 @@ public class ClienteRepository : IClienteRepository
 
     public async Task<IEnumerable<Cliente>> GetAllClientesAsync()
     {
-        var clientes = await _context.Clientes.ToListAsync();
-
-        if (clientes.Count == 0)
-            throw new InvalidOperationException("Não há clientes cadastrados no momento.");
-
-            return clientes;
+        return await _context.Clientes.ToListAsync();
     }
 
-    public async Task<Cliente> GetClienteByIdAsync(int id)
+    public async Task<ClienteDto> GetClienteByIdAsync(int id)
     {
         var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == id);
 
