@@ -18,12 +18,12 @@ namespace ProductCatalogService.Infra.Repositories
         {
             try
             {
-                if ( categoria == null)
-                    throw new ArgumentNullException(nameof( categoria));
+                if (categoria == null)
+                    throw new ArgumentNullException(nameof(categoria));
 
-                _context.Add( categoria);
+                _context.Add(categoria);
                 await _context.SaveChangesAsync();
-                return  categoria;
+                return categoria;
             }
             catch (DbUpdateException dbEx)
             {

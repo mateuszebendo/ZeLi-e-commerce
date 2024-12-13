@@ -2,12 +2,15 @@
 using ProductCatalogService.Domain.Entities;
 using ProductCatalogService.Infra.Data;
 using ProductCatalogService.Infra.Repositories;
+using AutoFixture;
+using Shouldly;
 
 namespace ProductCatalogService.Infra.Tests
 {
     public class CategoriaRepositoryTest
     {
         private readonly ConfigDataBase _context;
+        private readonly CategoriaRepository _repository;
 
         public CategoriaRepositoryTest()
         {
@@ -15,18 +18,18 @@ namespace ProductCatalogService.Infra.Tests
                     .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                     .Options;
             _context = new ConfigDataBase(options);
+
+            _repository = new CategoriaRepository(_context);
         }
 
         [Fact]
         public async Task CriaCategoria_QuandoDadosValidos_DeveRetornarCategoriaComId()
         {
             //Arrange 
-            var categoria = new Categoria("Informática", "Descricao");
-
-            var categoriaRepository = new CategoriaRepository(_context);
+            var categoria = new Fixture().Create<Categoria>();
 
             //Act 
-            Categoria? postResult = await categoriaRepository.AddAsync(categoria);
+            Categoria? postResult = await _repository.AddAsync(categoria);
 
             //Assert 
             Assert.NotNull(postResult);
@@ -37,30 +40,30 @@ namespace ProductCatalogService.Infra.Tests
         [Fact]
         public async Task ObterCategorias_Deve_Retornar_Todas_Categorias()
         {
-            //Arrange
-            var categorias = new List<Categoria>
-            {
-                new Categoria("Eletrônicos", "Descricao"),
-                new Categoria("Eletrodomésticos", "Descricao"),
-                new Categoria("Informática", "Descricao")
-            };
+            // Arrange
+            List<Categoria> categorias = new Fixture().CreateMany<Categoria>(3).ToList();
+            categorias.Count.ShouldBe(3);
 
-            await _context.AddRangeAsync(categorias);
+            foreach (var categoria in categorias)
+            {
+                await _context.Categorias.AddAsync(categoria);
+            }
             await _context.SaveChangesAsync();
 
-            var categoriaRepository = new CategoriaRepository(_context);
+            // Act 
+            List<Categoria>? getAllResult = await _repository.GetAllAsync();
 
-            //Act 
-            List<Categoria>? getAllResult = await categoriaRepository.GetAllAsync();
+            // Assert 
+            getAllResult.ShouldNotBeNull();
+            getAllResult.Count.ShouldBe(categorias.Count);
 
-            //Assert 
-            Assert.NotNull(getAllResult);
-            Assert.Equal(categorias.Count, getAllResult.Count);
+            categorias = categorias.OrderBy(c => c.Nome).ToList();
+            getAllResult = getAllResult.OrderBy(c => c.Nome).ToList();
 
             for (int i = 0; i < categorias.Count; i++)
             {
-                Assert.Equal(categorias[i].Nome, getAllResult[i].Nome);
-                Assert.Equal(categorias[i].Descricao, getAllResult[i].Descricao);
+                getAllResult[i].Nome.ShouldBe(categorias[i].Nome);
+                getAllResult[i].Descricao.ShouldBe(categorias[i].Descricao);
             }
         }
 
@@ -68,63 +71,56 @@ namespace ProductCatalogService.Infra.Tests
         public async Task ObterCategoriaPorId_QuandoIdExistente_DeveRetornarCategoria()
         {
             //Arrange
-            var categoria = new Categoria("Eletrônicos", "Descricao");
+            var categoria = new Fixture().Create<Categoria>();
 
             _context.Add(categoria);
             await _context.SaveChangesAsync();
 
-            var categoriaRepositorio = new CategoriaRepository(_context);
-
             //Act 
-            Categoria? getByIdResult = await categoriaRepositorio.GetByIdAsync(categoria.CategoriaID);
+            Categoria? getByIdResult = await _repository.GetByIdAsync(categoria.CategoriaID);
 
             //Assert 
-            Assert.NotNull(getByIdResult);
-            Assert.Equal(categoria.Nome, getByIdResult.Nome);
-            Assert.Equal(categoria.Descricao, getByIdResult.Descricao);
+            getByIdResult.ShouldNotBeNull();
+            getByIdResult.Nome.ShouldBe(categoria.Nome);
+            getByIdResult.Descricao.ShouldBe(categoria.Descricao);
         }
 
         [Fact]
         public async Task AtualizaCategoria_QuandoDadosValidos_DeveRetornarCategoriaAtualizadaIgualObjetoEnviado()
         {
             //Arrange 
-            var categoria = new Categoria("Eletrônicos", "Descricao");
+            var categoria = new Fixture().Create<Categoria>();
 
             _context.Add(categoria);
             await _context.SaveChangesAsync();
 
-            var categoriaRepository = new CategoriaRepository(_context);
-
-            // Agora para atualizar, usamos o método Update da própria entidade
             categoria.Update("Chinelos", "Descricao");
 
             //Act
-            Categoria? categoriaAtualizada = await categoriaRepository.UpdateAsync(categoria, categoria.CategoriaID);
+            Categoria? categoriaAtualizada = await _repository.UpdateAsync(categoria, categoria.CategoriaID);
 
             //Assert 
-            Assert.NotNull(categoriaAtualizada);
-            Assert.Equal("Chinelos", categoriaAtualizada.Nome);
-            Assert.Equal("Descricao", categoriaAtualizada.Descricao);
+            categoriaAtualizada.ShouldNotBeNull();
+            categoriaAtualizada.Nome.ShouldBe("Chinelos");
+            categoriaAtualizada.Descricao.ShouldBe("Descricao");
         }
 
         [Fact]
         public async Task DeletaCategoria_QuandoDeletada_RetornaTrueENaoEncontraNoBanco()
         {
             //Arrange
-            var categoria = new Categoria("Eletrônicos", "Descricao");
+            var categoria = new Fixture().Create<Categoria>();
 
             _context.Add(categoria);
             await _context.SaveChangesAsync();
 
-            var categoriaRepository = new CategoriaRepository(_context);
-
             //Act 
-            bool deletouComSucesso = await categoriaRepository.RemoveAsync(categoria.CategoriaID);
-            var ex = await Assert.ThrowsAsync<Exception>(() => categoriaRepository.GetByIdAsync(categoria.CategoriaID));
+            bool deletouComSucesso = await _repository.RemoveAsync(categoria.CategoriaID);
+            var ex = await Assert.ThrowsAsync<Exception>(() => _repository.GetByIdAsync(categoria.CategoriaID));
 
             //Assert
-            Assert.True(deletouComSucesso);
-            Assert.Equal(typeof(Exception), ex.GetType());
+            deletouComSucesso.ShouldBeTrue();
+            ex.GetType().ShouldBe(typeof(Exception));
         }
     }
 }

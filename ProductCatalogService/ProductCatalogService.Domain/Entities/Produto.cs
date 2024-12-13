@@ -4,17 +4,19 @@ namespace ProductCatalogService.Domain.Entities
 {
     public class Produto
     {
+        private Produto() { } 
+
         public Produto(string nome, string descricao, double preco, double estoque, int categoriaId, string imagemURL)
         {
             ValidateDomain(nome, descricao, preco, estoque, categoriaId, imagemURL);
         }
 
-        public int ProdutoID { get; private set; }
+        public int ProdutoID { get; set; }
         public String Nome { get; private set; }
         public String Descricao { get; private set; }
         public Double Preco { get; private set; }
         public Double Estoque { get; private set; }
-        public int CategoriaId {  get; private set; }
+        public int CategoriaId {  get; set; }
         public Categoria Categoria { get; set; }
         public String ImagemURL { get; private set; }
         public Boolean Ativo { get; set; } = true;

@@ -8,6 +8,7 @@ namespace ProductCatalogService.Application.Dtos
 {
     public class DetailsCategoriaDto
     {
+        public int Id { get; set; }
         public String Nome { get; set; }
         public String Descricao { get; set; }
     }

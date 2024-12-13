@@ -3,12 +3,15 @@ using ProductCatalogService.Infra.Repositories;
 using Newtonsoft.Json;
 using ProductCatalogService.Infra.Data;
 using Microsoft.EntityFrameworkCore;
+using AutoFixture;
+using Shouldly;
 
 namespace ProductCatalogService.Infra.Tests
 {
     public class ProdutoRepositoryTest
     {
         private readonly ConfigDataBase _context;
+        private readonly ProdutoRepository _repository;
 
         public ProdutoRepositoryTest()
         {
@@ -16,41 +19,36 @@ namespace ProductCatalogService.Infra.Tests
                     .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                     .Options;
             _context = new ConfigDataBase(options);
+
+            _repository = new ProdutoRepository(_context);
         }
 
         [Fact]
         public async Task CriarProduto_QuandoDadosValidos_DeveRetornarProdutoComId()
         {
             //Arrange
-            // Primeiro cria-se a categoria, obtém-se o CategoriaId.
-            var categoria = new Categoria("Informática", "Descricao");
+            Categoria categoria = new Fixture().Create<Categoria>();
             await _context.Categorias.AddAsync(categoria);
             await _context.SaveChangesAsync();
 
-            var produtoCriado = new Produto(
-                nome: "Notebook Gamer",
-                descricao: "Notebook potente para jogos e aplicações pesadas.",
-                preco: 5499.99,
-                estoque: 20,
-                categoriaId: categoria.CategoriaID,
-                imagemURL: "https://example.com/imagens/notebook-gamer.png");
-
-            ProdutoRepository produtoRepository = new ProdutoRepository(_context);
+            Produto produtoCriado = new Fixture().Build<Produto>().With(prod => prod.CategoriaId, categoria.CategoriaID).Create();
 
             //Act
-            var resultadoPost = await produtoRepository.AddAsync(produtoCriado);
+            Produto resultado = await _repository.AddAsync(produtoCriado);
 
             //Assert
-            Assert.NotNull(resultadoPost);
-            Assert.Equal(produtoCriado.Nome, resultadoPost.Nome);
-            Assert.Equal(produtoCriado.Descricao, resultadoPost.Descricao);
-            Assert.Equal(produtoCriado.Estoque, resultadoPost.Estoque);
-            Assert.Equal(produtoCriado.ImagemURL, resultadoPost.ImagemURL);
+            resultado.ShouldNotBeNull();
+
+            resultado.Nome.ShouldBe(produtoCriado.Nome);
+            resultado.Descricao.ShouldBe(produtoCriado.Descricao);
+            resultado.Estoque.ShouldBe(produtoCriado.Estoque);
+            resultado.ImagemURL.ShouldBe(produtoCriado.ImagemURL);
+            resultado.Preco.ShouldBe(produtoCriado.Preco);
+            resultado.CategoriaId.ShouldBe(produtoCriado.CategoriaId);
 
             // Categoria deve estar carregada
-            Assert.NotNull(resultadoPost.Categoria);
-            Assert.Equal(categoria.Nome, resultadoPost.Categoria.Nome);
-            Assert.Equal(categoria.Descricao, resultadoPost.Categoria.Descricao);
+            resultado.Categoria.Nome.ShouldBe(produtoCriado.Categoria.Nome);
+            resultado.Categoria.Descricao.ShouldBe(produtoCriado.Categoria.Descricao);
         }
 
 
@@ -58,99 +56,101 @@ namespace ProductCatalogService.Infra.Tests
         public async Task ObterProduto_QuandoIdValido_DeveRetornarProduto()
         {
             //Arrange
-            var categoria = new Categoria("Informática", "Descricao");
+            Categoria categoria = new Fixture().Create<Categoria>();
             await _context.Categorias.AddAsync(categoria);
             await _context.SaveChangesAsync();
 
-            var produtoOriginal = new Produto(
-                nome: "Notebook Gamer",
-                descricao: "Notebook potente para jogos e aplicações pesadas.",
-                preco: 5499.99,
-                estoque: 20,
-                categoriaId: categoria.CategoriaID,
-                imagemURL: "https://example.com/imagens/notebook-gamer.png"
-            );
+            Produto produtoOriginal = new Fixture().Build<Produto>().With(prod => prod.CategoriaId, categoria.CategoriaID).Create(); 
 
             _context.Add(produtoOriginal);
             await _context.SaveChangesAsync();
 
-            ProdutoRepository produtoRepository = new ProdutoRepository(_context);
-
             //Act
-            var resultadoGetById = await produtoRepository.GetByIdAsync(produtoOriginal.ProdutoID);
+            var resultado = await _repository.GetByIdAsync(produtoOriginal.ProdutoID);
 
-            //Assert 
-            Assert.NotNull(resultadoGetById);
+            //Assert
+            resultado.ShouldNotBeNull();
+            resultado.Nome.ShouldBe(produtoOriginal.Nome);
+            resultado.Descricao.ShouldBe(produtoOriginal.Descricao);
+            resultado.Estoque.ShouldBe(produtoOriginal.Estoque);
+            resultado.ImagemURL.ShouldBe(produtoOriginal.ImagemURL);
+            resultado.Preco.ShouldBe(produtoOriginal.Preco);
+            resultado.CategoriaId.ShouldBe(produtoOriginal.CategoriaId);
 
-            var obj1 = JsonConvert.SerializeObject(resultadoGetById);
-            var obj2 = JsonConvert.SerializeObject(produtoOriginal);
+            // Categoria deve estar carregada
+            resultado.Categoria.Nome.ShouldBe(produtoOriginal.Categoria.Nome);
+            resultado.Categoria.Descricao.ShouldBe(produtoOriginal.Categoria.Descricao);
 
-            Assert.Equal(obj1, obj2);
         }
 
         [Fact]
         public async Task ObterProdutos_QuandoExistemProdutos_DeveRetornarListaDeProdutos()
         {
             //Arrange
-            var categoriaInformatica = new Categoria("Informática", "Descricao");
-            var categoriaEletronicos = new Categoria("Eletrônicos", "Descricao");
-            var categoriaEletro = new Categoria("Eletrodomésticos", "Descricao");
+            List<Categoria> categorias = new List<Categoria>();
+            new Fixture().AddManyTo(categorias);
 
-            await _context.Categorias.AddRangeAsync(categoriaInformatica, categoriaEletronicos, categoriaEletro);
-            await _context.SaveChangesAsync();
-
-            List<Produto> listaProdutoOriginal = new List<Produto>()
+            foreach(var categoria in categorias)
             {
-                new Produto(
-                    "Notebook Gamer",
-                    "Notebook potente para jogos e aplicações pesadas.",
-                    5499.99,
-                    20,
-                    categoriaInformatica.CategoriaID,
-                    "https://example.com/imagens/notebook-gamer.png"
-                ),
-                new Produto(
-                    "Smartphone X",
-                    "Smartphone com câmera de alta resolução e bateria de longa duração.",
-                    1999.99,
-                    50,
-                    categoriaEletronicos.CategoriaID,
-                    "https://example.com/imagens/smartphone-x.png"
-                ),
-                new Produto(
-                    "Cafeteira Automática",
-                    "Cafeteira com temporizador e reservatório de água embutido.",
-                    299.90,
-                    10,
-                    categoriaEletro.CategoriaID,
-                    "https://example.com/imagens/cafeteira-automatica.png"
-                )
-            };
-
-            _context.AddRange(listaProdutoOriginal);
+                await _context.Categorias.AddAsync(categoria);
+            }
             await _context.SaveChangesAsync();
 
-            ProdutoRepository produtoRepository = new ProdutoRepository(_context);
+            var categoriaIds = categorias.Select(c => c.CategoriaID).ToList();
+
+            var fixture = new Fixture();
+
+            var random = new Random();
+
+            fixture.Customize<Produto>(composer => composer
+                .FromFactory(() =>
+                {
+                    // Seleciona um CategoriaId aleatório da lista existente
+                    int selectedCategoriaId = categoriaIds[random.Next(categoriaIds.Count)];
+
+                    // Cria uma instância de Produto com os valores gerados e o CategoriaId selecionado
+                    return new Produto(
+                        nome: fixture.Create<string>(),
+                        descricao: fixture.Create<string>(),
+                        preco: fixture.Create<double>(),
+                        estoque: fixture.Create<double>(),
+                        categoriaId: selectedCategoriaId,
+                        imagemURL: fixture.Create<string>()
+                    );
+                })
+                .OmitAutoProperties() // Evita que o AutoFixture atribua automaticamente outras propriedades
+              );
+
+            List<Produto> listaProdutoOriginal = fixture.CreateMany<Produto>(10).ToList();
+
+            foreach (var produto in listaProdutoOriginal)
+            {
+                await _context.Produtos.AddAsync(produto);
+            }
+            await _context.SaveChangesAsync();
 
             //Act
-            var resultadoGetAll = await produtoRepository.GetAllAsync();
+            var resultadoGetAll = await _repository.GetAllAsync();
 
             //Assert
             Assert.NotNull(resultadoGetAll);
             Assert.Equal(listaProdutoOriginal.Count, resultadoGetAll.Count);
 
+            listaProdutoOriginal = listaProdutoOriginal.OrderBy(p => p.Nome).ToList();
+            resultadoGetAll = resultadoGetAll.OrderBy(p => p.Nome).ToList();
+
             for (int i = 0; i < listaProdutoOriginal.Count; i++)
             {
-                Assert.Equal(listaProdutoOriginal[i].Nome, resultadoGetAll[i].Nome);
-                Assert.Equal(listaProdutoOriginal[i].Descricao, resultadoGetAll[i].Descricao);
-                Assert.Equal(listaProdutoOriginal[i].Preco, resultadoGetAll[i].Preco);
-                Assert.Equal(listaProdutoOriginal[i].Estoque, resultadoGetAll[i].Estoque);
-                Assert.Equal(listaProdutoOriginal[i].ImagemURL, resultadoGetAll[i].ImagemURL);
+                resultadoGetAll[i].Nome.ShouldBe(listaProdutoOriginal[i].Nome);
+                resultadoGetAll[i].Descricao.ShouldBe(listaProdutoOriginal[i].Descricao);
+                resultadoGetAll[i].Estoque.ShouldBe(listaProdutoOriginal[i].Estoque);
+                resultadoGetAll[i].ImagemURL.ShouldBe(listaProdutoOriginal[i].ImagemURL);
+                resultadoGetAll[i].Preco.ShouldBe(listaProdutoOriginal[i].Preco);
+                resultadoGetAll[i].CategoriaId.ShouldBe(listaProdutoOriginal[i].CategoriaId);
 
-                Assert.NotNull(resultadoGetAll[i].Categoria);
-                Assert.Equal(listaProdutoOriginal[i].CategoriaId, resultadoGetAll[i].CategoriaId);
-                Assert.Equal(listaProdutoOriginal[i].Categoria.Nome, resultadoGetAll[i].Categoria.Nome);
-                Assert.Equal(listaProdutoOriginal[i].Categoria.Descricao, resultadoGetAll[i].Categoria.Descricao);
+                resultadoGetAll[i].Categoria.CategoriaID.ShouldBe(listaProdutoOriginal[i].Categoria.CategoriaID);
+                resultadoGetAll[i].Categoria.Nome.ShouldBe(listaProdutoOriginal[i].Categoria.Nome);
+                resultadoGetAll[i].Categoria.Descricao.ShouldBe(listaProdutoOriginal[i].Categoria.Descricao);
             }
         }
 
@@ -158,88 +158,64 @@ namespace ProductCatalogService.Infra.Tests
         public async Task AtualizarProduto_QuandoDadosValidos_DeveRetornarProdutoAtualizadoIgualObjetoEnviado()
         {
             //Arrange
-            var categoria = new Categoria("Informática", "Descricao");
+            var categoria = new Fixture().Create<Categoria>();
             await _context.Categorias.AddAsync(categoria);
             await _context.SaveChangesAsync();
 
-            var produtoOriginal = new Produto(
-                nome: "Notebook Gamer",
-                descricao: "Notebook potente para jogos e aplicações pesadas.",
-                preco: 5499.99,
-                estoque: 20,
-                categoriaId: categoria.CategoriaID,
-                imagemURL: "https://example.com/imagens/notebook-gamer.png"
-            );
+            var produtoOriginal = new Fixture().Build<Produto>().With(x => x.CategoriaId, categoria.CategoriaID).Create();
 
             await _context.Produtos.AddAsync(produtoOriginal);
             await _context.SaveChangesAsync();
 
-            var produtoAtualizado = new Produto(
-                nome: "Notebook Gamer Atualizado",
-                descricao: "Notebook mais potente para jogos e aplicações pesadas.",
-                preco: 6499.99,
-                estoque: 20,
-                categoriaId: categoria.CategoriaID,
-                imagemURL: "https://example.com/imagens/notebook-gamer.png"
-            );
+            var produtoAtualizado = new Fixture().Build<Produto>()
+                .With(x => x.CategoriaId, categoria.CategoriaID)
+                .With(x => x.ProdutoID, produtoOriginal.ProdutoID)
+                .Create();
 
-            produtoAtualizado.Categoria = produtoOriginal.Categoria;
-
-            var produtoRepository = new ProdutoRepository(_context);
 
             //Act
-            var produtoPreAlteracoes = await produtoRepository.GetByIdAsync(produtoOriginal.ProdutoID);
-            Assert.NotNull(produtoPreAlteracoes);
-            Assert.Equal(produtoOriginal.Nome, produtoPreAlteracoes.Nome);
-            Assert.Equal(produtoOriginal.Descricao, produtoPreAlteracoes.Descricao);
-            Assert.Equal(produtoOriginal.Preco, produtoPreAlteracoes.Preco);
-            Assert.Equal(produtoOriginal.Estoque, produtoPreAlteracoes.Estoque);
-            Assert.Equal(produtoOriginal.Categoria.Nome, produtoPreAlteracoes.Categoria.Nome);
-            Assert.Equal(produtoOriginal.Categoria.Descricao, produtoPreAlteracoes.Categoria.Descricao);
-            Assert.Equal(produtoOriginal.ImagemURL, produtoPreAlteracoes.ImagemURL);
+            var produtoPreAlteracoes = await _repository.GetByIdAsync(produtoOriginal.ProdutoID);
+            produtoPreAlteracoes.ShouldNotBeNull();
+            produtoPreAlteracoes.Nome.ShouldBe(produtoOriginal.Nome);
+            produtoPreAlteracoes.Descricao.ShouldBe(produtoOriginal.Descricao);
+            produtoPreAlteracoes.Preco.ShouldBe(produtoOriginal.Preco);
+            produtoPreAlteracoes.Estoque.ShouldBe(produtoOriginal.Estoque);
+            produtoPreAlteracoes.Categoria.Nome.ShouldBe(produtoOriginal.Categoria.Nome);
+            produtoPreAlteracoes.Categoria.Descricao.ShouldBe(produtoOriginal.Categoria.Descricao);
+            produtoPreAlteracoes.ImagemURL.ShouldBe(produtoOriginal.ImagemURL);
 
-            var produtoPosAlteracoes = await produtoRepository.UpdateAsync(produtoAtualizado, produtoOriginal.ProdutoID);
+            var produtoPosAlteracoes = await _repository.UpdateAsync(produtoAtualizado, produtoOriginal.ProdutoID);
 
-            //Assert 
-            Assert.NotNull(produtoPosAlteracoes);
-
-            Assert.Equal(produtoAtualizado.Nome, produtoPosAlteracoes.Nome);
-            Assert.Equal(produtoAtualizado.Descricao, produtoPosAlteracoes.Descricao);
-            Assert.Equal(produtoAtualizado.Preco, produtoPosAlteracoes.Preco);
-            Assert.Equal(produtoAtualizado.Estoque, produtoPosAlteracoes.Estoque);
-            Assert.Equal(produtoAtualizado.Categoria.Nome, produtoPosAlteracoes.Categoria.Nome);
-            Assert.Equal(produtoAtualizado.Categoria.Descricao, produtoPosAlteracoes.Categoria.Descricao);
-            Assert.Equal(produtoAtualizado.ImagemURL, produtoPosAlteracoes.ImagemURL);
+            //Assert
+            produtoPosAlteracoes.ShouldNotBeNull();
+            produtoPosAlteracoes.Nome.ShouldBe(produtoAtualizado.Nome);
+            produtoPosAlteracoes.Descricao.ShouldBe(produtoAtualizado.Descricao);
+            produtoPosAlteracoes.Preco.ShouldBe(produtoAtualizado.Preco);
+            produtoPosAlteracoes.Estoque.ShouldBe(produtoAtualizado.Estoque);
+            produtoPosAlteracoes.Categoria.Nome.ShouldBe(produtoAtualizado.Categoria.Nome);
+            produtoPosAlteracoes.Categoria.Descricao.ShouldBe(produtoAtualizado.Categoria.Descricao);
+            produtoPosAlteracoes.ImagemURL.ShouldBe(produtoAtualizado.ImagemURL);
         }
 
         [Fact]
         public async Task DeletarProduto_QuandoProdutoExistente_DeveRetornarTrueEEvitarQueProdutoAindaExista()
         {
             //Arrange
-            var categoria = new Categoria("Informática", "Descricao");
+            var categoria = new Fixture().Create<Categoria>();
             await _context.Categorias.AddAsync(categoria);
             await _context.SaveChangesAsync();
 
-            var produtoOriginal = new Produto(
-                nome: "Notebook Gamer",
-                descricao: "Notebook potente para jogos e aplicações pesadas.",
-                preco: 5499.99,
-                estoque: 20,
-                categoriaId: categoria.CategoriaID,
-                imagemURL: "https://example.com/imagens/notebook-gamer.png"
-            );
+            var produtoOriginal = new Fixture().Build<Produto>().With(prod => prod.CategoriaId, categoria.CategoriaID).Create();
 
             _context.Add(produtoOriginal);
             await _context.SaveChangesAsync();
 
-            ProdutoRepository produtoRepository = new ProdutoRepository(_context);
-
             //Act 
-            bool deletouComSucesso = await produtoRepository.RemoveAsync(produtoOriginal.ProdutoID);
+            bool deletouComSucesso = await _repository.RemoveAsync(produtoOriginal.ProdutoID);
 
             //Assert 
             Assert.True(deletouComSucesso);
-            await Assert.ThrowsAsync<Exception>(() => produtoRepository.GetByIdAsync(produtoOriginal.ProdutoID));
+            await Assert.ThrowsAsync<Exception>(() => _repository.GetByIdAsync(produtoOriginal.ProdutoID));
         }
     }
 }

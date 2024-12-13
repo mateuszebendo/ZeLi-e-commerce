@@ -8,7 +8,7 @@ namespace ProductCatalogService.Application.Dtos
 {
     public class UpdateCategoriaDto
     {
-        public String Categoria { get; set; }
+        public String Nome { get; set; }
         public String Descricao { get; set; }
     }
 }
