@@ -13,7 +13,7 @@ public interface IClienteRepository
     Task<IEnumerable<Cliente>> GetAllClientesAsync();
     Task<Cliente> GetClienteByIdAsync(int id);
     Task<Cliente> GetClienteByEmailAsync(string email);
-    Task<Cliente> UpdateCliente(Cliente cliente, int id);
-    Task<Cliente> UpdateSenha(int id, string novaSenha);
+    Task<Cliente> UpdateClienteAsync(Cliente cliente, int id);
+    Task<Boolean> UpdateSenha(int id, string novaSenha);
     Task<Cliente> DeleteCliente(int id);
 }

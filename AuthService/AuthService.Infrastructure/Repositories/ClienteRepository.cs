@@ -44,7 +44,7 @@ public class ClienteRepository : IClienteRepository
         return cliente;
     }
 
-    public async Task<Cliente> UpdateCliente(Cliente cliente, int id)
+    public async Task<Cliente> UpdateClienteAsync(Cliente cliente, int id)
     {
         var clienteToUpdate = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == id);
 
@@ -58,17 +58,17 @@ public class ClienteRepository : IClienteRepository
         return clienteToUpdate;
     }
 
-    public async Task<Cliente> UpdateSenha(int clienteId, string novaSenha)
+    public async Task<Boolean> UpdateSenha(int clienteId, string novaSenha)
     {
         var clienteToUpdate = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == clienteId);
 
         if (clienteToUpdate == null)
-            return null;
+            return false;
 
         clienteToUpdate.Senha = novaSenha;
 
         await _context.SaveChangesAsync();
-        return clienteToUpdate;
+        return true;
     }
 
     public async Task<Cliente> DeleteCliente(int id)

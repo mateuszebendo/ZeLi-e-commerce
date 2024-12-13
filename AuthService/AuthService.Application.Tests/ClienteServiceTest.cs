@@ -28,42 +28,45 @@ public class ClienteServiceTest
     public async void Criar_Novo_Cliente_Dados_Corretos_Deve_Retornar_Cliente()
     {
         //Arrange
-        var clienteDto = new ClienteCreateDto("JAO Gomes", "jaozin123@gmail.com", "Password1!");
+        var clienteCreateDto = new ClienteCreateDto("JAO Gomes", "jaozin123@gmail.com", "Password1!");
 
-        var clienteEntity = _mapper.Map<Cliente>(clienteDto);
+        var clienteEntity = _mapper.Map<Cliente>(clienteCreateDto);
         var mockRepository = new Moq.Mock<IClienteRepository>();
 
         mockRepository.Setup(s => s.CreateClienteAsync(clienteEntity)).ReturnsAsync(clienteEntity);
         var service = new ClienteService(mockRepository.Object, _mapper);
 
         //Act
-        var clienteToCreate = await service.CreateClienteAsync(clienteDto);
+        var clienteToCreate = await service.CreateClienteAsync(clienteCreateDto);
 
         //Assert
         Assert.NotNull(clienteToCreate);
-        Assert.Equal(clienteDto.Nome, clienteToCreate.Nome);
-        Assert.Equal(clienteDto.Email, clienteToCreate.Email);
+        Assert.Equal(clienteCreateDto.Nome, clienteToCreate.Nome);
+        Assert.Equal(clienteCreateDto.Email, clienteToCreate.Email);
 
         mockRepository.Verify(r => r.CreateClienteAsync(
-            It.Is<Cliente>(c => c.Email == clienteDto.Email && c.Nome == clienteDto.Nome && c.Senha == clienteDto.Senha)), Times.Once); //verifica se o metodo funcionou
+            It.Is<Cliente>(c => c.Email == clienteEntity.Email && c.Nome == clienteEntity.Nome && c.Senha == clienteEntity.Senha)), Times.Once);
     }
 
     [Fact]
     public async Task Criar_Novo_Cliente_Com_Email_Existente_Deve_Falhar_Retornar_Excecao()
     {
         //Arrange
-        var clienteDto = new ClienteCreateDto("Claudin Borracheiro", "claudin@email.com", "Password1!");
+        var clienteDto = new ClienteCreateDto("Claudin Borracheiro", "claudin@gmail.com", "Password1!");
         var clienteEntity = _mapper.Map<Cliente>(clienteDto);
 
-        var mockRepository = new Moq.Mock<IClienteRepository>();
+        var mockRepository = new Mock<IClienteRepository>();
+        var mockMapper = new Mock<IMapper>();
 
-        mockRepository.Setup(s => s.CreateClienteAsync(It.IsAny<Cliente>())).ThrowsAsync(new InvalidOperationException());
-        var service = new ClienteService(mockRepository.Object, _mapper);
+        mockRepository.Setup(s => s.GetClienteByEmailAsync(clienteDto.Email)).ReturnsAsync(clienteEntity);
 
-        //Act e Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateClienteAsync(clienteDto));
+        var service = new ClienteService(mockRepository.Object, mockMapper.Object);
 
-        mockRepository.Verify(v => v.CreateClienteAsync(clienteEntity), Times.Never); //verifica se o metodo nao foi chamado
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateClienteAsync(clienteDto));
+        Assert.Equal("Já existe um cliente com este email.", exception.Message);
+
+        mockRepository.Verify(v => v.CreateClienteAsync(It.IsAny<Cliente>()), Times.Never);
     }
 
     [Fact]
@@ -136,10 +139,8 @@ public class ClienteServiceTest
 
         //Assert
         Assert.NotNull(clienteDto);
-        Assert.Equal(cliente.Nome, clienteDto.Nome);
-        Assert.Equal(cliente.Email, clienteDto.Email);
 
-        mockRepository.Verify(v => v.GetClienteByIdAsync(1),Times.Once);
+        mockRepository.Verify(v => v.GetClienteByIdAsync(1), Times.Once);
     }
 
     [Fact]
@@ -154,5 +155,205 @@ public class ClienteServiceTest
         await Assert.ThrowsAsync<KeyNotFoundException>(() => service.GetClienteByIdAsync(1));
 
         mockRepository.Verify(v => v.GetClienteByIdAsync(1), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtemClientePeloEmail_QuandoEmailValido_RetornaCliente()
+    {
+        //Arrange
+        var cliente = new Cliente("Bonafe", "bonafe@email.com", "Password1!");
+
+        var mockRepository = new Moq.Mock<IClienteRepository>();
+        mockRepository.Setup(s => s.GetClienteByEmailAsync(cliente.Email)).ReturnsAsync(cliente);
+        var service = new ClienteService(mockRepository.Object, _mapper);
+
+        //Act
+        var clienteDto = await service.GetClienteByEmailAsync(cliente.Email);
+
+        //Assert
+        Assert.NotNull(clienteDto);
+
+        mockRepository.Verify(v => v.GetClienteByEmailAsync(clienteDto.Email), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtemClientePeloEmail_QuandoEmailNaoValido_RetornaExcecao()
+    {
+        //Arrange
+        var emailQualquer = "qualquer@email.com";
+
+        var mockRepository = new Mock<IClienteRepository>();
+        mockRepository.Setup(s => s.GetClienteByEmailAsync(emailQualquer)).ReturnsAsync((Cliente)null);
+        var service = new ClienteService(mockRepository.Object, _mapper);
+
+        //Act e Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => service.GetClienteByEmailAsync(emailQualquer));
+
+        mockRepository.Verify(v => v.GetClienteByEmailAsync(emailQualquer), Times.Once);
+    }
+
+    [Fact]
+    public async Task AtualizaDadosCliente_QuandoDadosEIdValidos_RetornaClienteAtualizado()
+    {
+        // Arrange
+        var cliente = new Cliente("Bonafe", "bonafe@email.com", "Password1!");
+        cliente.ClienteId = 1;
+
+        var clienteUpdateDto = new ClienteUpdateDto("Lucas Bonafe", "bonafe@email.com");
+        var clienteAtualizado = new Cliente
+        {
+            ClienteId = cliente.ClienteId,
+            Nome = clienteUpdateDto.Nome,
+            Email = clienteUpdateDto.Email,
+            Senha = cliente.Senha
+        };
+
+        var mockRepository = new Mock<IClienteRepository>();
+        mockRepository.Setup(r => r.GetClienteByIdAsync(cliente.ClienteId)).ReturnsAsync(cliente);
+        mockRepository.Setup(r => r.UpdateClienteAsync(It.IsAny<Cliente>(), cliente.ClienteId)).ReturnsAsync(clienteAtualizado);
+
+        var service = new ClienteService(mockRepository.Object, _mapper);
+
+        // Act
+        var clienteDto = await service.UpdateCliente(clienteUpdateDto, cliente.ClienteId);
+
+        // Assert
+        Assert.NotNull(clienteDto);
+        Assert.Equal(clienteAtualizado.Nome, clienteDto.Nome);
+        Assert.Equal(clienteAtualizado.Email, clienteDto.Email);
+
+        mockRepository.Verify(r => r.GetClienteByIdAsync(cliente.ClienteId), Times.Once);
+        mockRepository.Verify(r => r.UpdateClienteAsync(It.IsAny<Cliente>(), cliente.ClienteId), Times.Once);
+    }
+
+    [Fact]
+    public async Task AtualizaDadosCliente_QuandoIdNaoValido_retornaExcecao()
+    {
+        // Arrange
+        var clienteUpdateDto = new ClienteUpdateDto("Lucas Bonafe", "bonafe@email.com");
+        var idInvalido = 999;
+
+        var mockRepository = new Mock<IClienteRepository>();
+        mockRepository.Setup(s => s.GetClienteByIdAsync(idInvalido)).ReturnsAsync((Cliente)null);
+
+        var mockMapper = new Mock<IMapper>();
+        var service = new ClienteService(mockRepository.Object, mockMapper.Object);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => service.UpdateCliente(clienteUpdateDto, idInvalido));
+        Assert.Equal($"Nenhum cliente encontrado com o Id {idInvalido}.", exception.Message);
+
+        // Verifica que GetClienteByIdAsync foi chamado
+        mockRepository.Verify(s => s.GetClienteByIdAsync(idInvalido), Times.Once);
+
+        // Verifica que UpdateClienteAsync nunca foi chamado
+        mockRepository.Verify(s => s.UpdateClienteAsync(It.IsAny<Cliente>(), idInvalido), Times.Never);
+    }
+
+    [Fact]
+    public async Task AtualizaSenhaCliente_QuandoSenhaEIdValidos_retornaTrue()
+    {
+        //Arrange
+        var cliente = new Cliente("Bonafe", "bonafe@email.com", "Password1!");
+        cliente.ClienteId = 1;
+
+        var novaSenha = "NewPassword1!";
+
+        var mockRepository = new Mock<IClienteRepository>();
+        mockRepository.Setup(s => s.GetClienteByIdAsync(cliente.ClienteId)).ReturnsAsync(cliente);
+        var service = new ClienteService(mockRepository.Object, _mapper);
+
+        //Act
+        var response = await service.UpdateSenha(cliente.ClienteId, novaSenha);
+
+        //Assert
+        Assert.NotNull(novaSenha);
+        Assert.Equal(cliente.Senha, novaSenha);
+        Assert.True(response);
+    }
+
+    [Fact]
+    public async Task AtualizaCliente_QuandoIdInvalido_LancaExcecao()
+    {
+        // Arrange
+        var clienteUpdateDto = new ClienteUpdateDto("Lucas Bonafe", "bonafe@email.com");
+        var idInvalido = 999;
+
+        var mockRepository = new Mock<IClienteRepository>();
+        var mockMapper = new Mock<IMapper>();
+
+        mockRepository.Setup(s => s.GetClienteByIdAsync(idInvalido)).ReturnsAsync((Cliente)null);
+
+        var service = new ClienteService(mockRepository.Object, mockMapper.Object);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => service.UpdateCliente(clienteUpdateDto, idInvalido));
+        Assert.Equal($"Nenhum cliente encontrado com o Id {idInvalido}.", exception.Message);
+
+        mockRepository.Verify(s => s.GetClienteByIdAsync(idInvalido), Times.Once);
+        mockRepository.Verify(s => s.UpdateClienteAsync(It.IsAny<Cliente>(), idInvalido), Times.Never);
+    }
+
+
+    [Fact]
+    public async Task UpdateSenha_QuandoSenhaValida_AtualizaComSucesso()
+    {
+        // Arrange
+        var cliente = new Cliente("Bonafe", "bonafe@email.com", "Password1!");
+        cliente.ClienteId = 1;
+
+        var novaSenha = "NovaSenha1!";
+
+        var mockRepository = new Mock<IClienteRepository>();
+        mockRepository.Setup(r => r.GetClienteByIdAsync(cliente.ClienteId)).ReturnsAsync(cliente);
+
+        var service = new ClienteService(mockRepository.Object, _mapper);
+
+        // Act
+        var result = await service.UpdateSenha(cliente.ClienteId, novaSenha);
+
+        // Assert
+        Assert.True(result, "O método deve retornar true para uma senha válida.");
+
+        mockRepository.Verify(r => r.GetClienteByIdAsync(cliente.ClienteId), Times.Once);
+    }
+
+    [Fact]
+    public async Task DesativaCliente_QuandoIdValido_RetornaClienteDesativado()
+    {
+        //Arrange
+        var cliente = new Cliente("Bonafe", "bonafe@email.com", "Password1!");
+        cliente.ClienteId = 1;
+
+        var clienteId = 1;
+
+        var mockRepository = new Mock<IClienteRepository>();
+        mockRepository.Setup(r => r.GetClienteByIdAsync(cliente.ClienteId)).ReturnsAsync(cliente);
+
+        var service = new ClienteService(mockRepository.Object, _mapper);
+
+        //Act 
+        var clienteDesativado = await service.DeleteCliente(clienteId);
+
+        //Assert
+        Assert.NotNull(clienteDesativado);
+
+        mockRepository.Verify(repo => repo.DeleteCliente(It.IsAny<int>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task DesativaCliente_QuandoIdInvalido_RetornaExcecao()
+    {
+        //Arrange
+        var idInvalido = 999;
+        var mockRepository = new Mock<IClienteRepository>();
+        var service = new ClienteService(mockRepository.Object, _mapper);
+
+        //Act
+        var clienteDesativado = await service.DeleteCliente(idInvalido);
+
+        //Assert
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => service.DeleteCliente(idInvalido));
+        Assert.Equal($"Nenhum cliente encontrado com o Id {idInvalido}.", exception.Message);
     }
 }

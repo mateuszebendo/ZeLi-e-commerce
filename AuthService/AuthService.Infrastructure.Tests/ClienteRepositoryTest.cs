@@ -98,7 +98,7 @@ public class ClienteRepositoryTest
         var clienteAtualizado = new Cliente ("Novo Nome", "email@aaaemail.com", "Password1!");
 
         //Act
-        await repository.UpdateCliente(clienteAtualizado, cliente.ClienteId);
+        await repository.UpdateClienteAsync(clienteAtualizado, cliente.ClienteId);
         clienteAtualizado.ClienteId = cliente.ClienteId;
 
         //Assert

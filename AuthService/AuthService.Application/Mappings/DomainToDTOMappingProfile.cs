@@ -15,5 +15,6 @@ public class DomainToDTOMappingProfile : Profile
     {
         CreateMap<Cliente, ClienteDto>().ReverseMap();
         CreateMap<Cliente, ClienteCreateDto>().ReverseMap();
+        CreateMap<Cliente, ClienteUpdateDto>().ReverseMap();
     }
 }

@@ -13,8 +13,8 @@ public interface IClienteService
     Task<ClienteDto> CreateClienteAsync(ClienteCreateDto clienteCreateDto);
     Task<IEnumerable<ClienteDto>> GetAllClientesAsync();
     Task<ClienteDto> GetClienteByIdAsync(int id);
-    Task<Cliente> GetClienteByEmailAsync(string email);
-    Task<Cliente> UpdateCliente(Cliente cliente, int id);
+    Task<ClienteDto> GetClienteByEmailAsync(string email);
+    Task<ClienteDto> UpdateCliente(ClienteUpdateDto clienteUpdateDto, int id);
     Task<bool> UpdateSenha(int id, string novaSenha);
-    Task<Cliente> DeleteCliente(int id);
+    Task<ClienteDto> DeleteCliente(int id);
 }

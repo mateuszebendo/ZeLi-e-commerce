@@ -15,7 +15,7 @@ public class ClienteCreateDto
     public string Nome { get; set; }
 
     [Required(ErrorMessage = "Email é obrigatório.")]
-    [RegularExpression(@"^[a-zA-Z0-9_.+\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-.]+$", ErrorMessage = "Email inválido.")]
+    [RegularExpression(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", ErrorMessage = "Email inválido.")]
     public string Email { get; set; }
 
     [Required(ErrorMessage = "Senha é obrigatória.")]

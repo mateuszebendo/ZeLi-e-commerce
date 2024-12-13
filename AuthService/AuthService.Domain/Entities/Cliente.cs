@@ -29,9 +29,14 @@ public class Cliente
         Ativo = true;
     }
 
+    public Cliente()
+    {
+    }
+
     private void ValidateDomain(string nome, string email, string senha)
     {
         bool nomeInvalido = !NomeRegex.IsMatch(nome);
+
         DomainExceptionValidation.When(string.IsNullOrEmpty(nome), "Nome inválido. O nome é obrigatório");
         DomainExceptionValidation.When(nome.Length < 3, "O nome deve ter no mínimo 3 caracteres");
         DomainExceptionValidation.When(nomeInvalido,
@@ -39,7 +44,7 @@ public class Cliente
 
         bool emailInvalido = !EmailRegex.IsMatch(email);
 
-        DomainExceptionValidation.When(string.IsNullOrEmpty(email), "Email inválido. O nome é obrigatório");
+        DomainExceptionValidation.When(string.IsNullOrEmpty(email), "Email inválido. O Email é obrigatório");
         DomainExceptionValidation.When(emailInvalido,
             "Email invalido");
 
