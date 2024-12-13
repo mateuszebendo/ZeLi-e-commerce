@@ -32,23 +32,15 @@ public class ClienteRepository : IClienteRepository
         return await _context.Clientes.ToListAsync();
     }
 
-    public async Task<ClienteDto> GetClienteByIdAsync(int id)
+    public async Task<Cliente> GetClienteByIdAsync(int id)
     {
         var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == id);
-
-        if (cliente == null)
-            throw new KeyNotFoundException($"Nenhum cliente encontrado com o Id {id}.");
-
         return cliente;
     }
 
     public async Task<Cliente> GetClienteByEmailAsync(string email)
     {
         var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Email == email);
-
-        if (cliente == null)
-            throw new KeyNotFoundException($"Nenhum cliente encontrado com o Id {email}.");
-
         return cliente;
     }
 
@@ -66,17 +58,17 @@ public class ClienteRepository : IClienteRepository
         return clienteToUpdate;
     }
 
-    public async Task<bool> UpdateSenha(int clienteId, string novaSenha)
+    public async Task<Cliente> UpdateSenha(int clienteId, string novaSenha)
     {
         var clienteToUpdate = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == clienteId);
 
         if (clienteToUpdate == null)
-            return false;
+            return null;
 
         clienteToUpdate.Senha = novaSenha;
 
         await _context.SaveChangesAsync();
-        return true;
+        return clienteToUpdate;
     }
 
     public async Task<Cliente> DeleteCliente(int id)
@@ -84,9 +76,7 @@ public class ClienteRepository : IClienteRepository
         var clienteToDelete = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == id);
 
         if (clienteToDelete == null)
-        {
-            throw new KeyNotFoundException($"Nenhum cliente encontrado com o Id {id}.");
-        }
+            return null;
 
         clienteToDelete.Ativo = false;
         await _context.SaveChangesAsync();

@@ -14,6 +14,6 @@ public interface IClienteRepository
     Task<Cliente> GetClienteByIdAsync(int id);
     Task<Cliente> GetClienteByEmailAsync(string email);
     Task<Cliente> UpdateCliente(Cliente cliente, int id);
-    Task<bool> UpdateSenha(int id, string novaSenha);
+    Task<Cliente> UpdateSenha(int id, string novaSenha);
     Task<Cliente> DeleteCliente(int id);
 }

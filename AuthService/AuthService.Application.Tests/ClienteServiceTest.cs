@@ -85,8 +85,8 @@ public class ClienteServiceTest
         List<ClienteDto>? clientesDto = (List<ClienteDto>?)await service.GetAllClientesAsync();
 
         // Assert
-        Assert.NotEmpty(clientesDto);
         Assert.NotNull(clientesDto);
+        Assert.NotEmpty(clientesDto);
         Assert.Equal(clientes.Count(), clientesDto.Count());
 
         clientes = clientes.OrderBy(c => c.Nome).ToList();
@@ -125,6 +125,7 @@ public class ClienteServiceTest
     {
         //Arrange
         var cliente = new Cliente("Bonafe", "bonafe@email.com", "Password1!");
+        cliente.ClienteId = 1;
 
         var mockRepository = new Moq.Mock<IClienteRepository>();
         mockRepository.Setup(s => s.GetClienteByIdAsync(1)).ReturnsAsync(cliente);
@@ -138,6 +139,20 @@ public class ClienteServiceTest
         Assert.Equal(cliente.Nome, clienteDto.Nome);
         Assert.Equal(cliente.Email, clienteDto.Email);
 
-        mockRepository.Verify(v => v.CreateClienteAsync(cliente),Times.Once);
+        mockRepository.Verify(v => v.GetClienteByIdAsync(1),Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtemClientePeloId_QuandoIdNaoValido_RetornaExcecao()
+    {
+        //Arrange       
+        var mockRepository = new Mock<IClienteRepository>();
+        mockRepository.Setup(s => s.GetClienteByIdAsync(1)).ReturnsAsync((Cliente)null);
+        var service = new ClienteService(mockRepository.Object, _mapper);
+
+        //Act e Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => service.GetClienteByIdAsync(1));
+
+        mockRepository.Verify(v => v.GetClienteByIdAsync(1), Times.Once);
     }
 }

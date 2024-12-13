@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Application.Services;
 
@@ -46,7 +47,14 @@ public class ClienteService : IClienteService
 
     public async Task<ClienteDto> GetClienteByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        var clienteEntity = await _clienteRepository.GetClienteByIdAsync(id);
+
+        if (clienteEntity == null)
+            throw new KeyNotFoundException($"Nenhum cliente encontrado com o id {id}.");
+
+        var clienteDto = _mapper.Map<ClienteDto>(clienteEntity);
+
+        return clienteDto;
     }
 
     public async Task<Cliente> GetClienteByEmailAsync(string email)

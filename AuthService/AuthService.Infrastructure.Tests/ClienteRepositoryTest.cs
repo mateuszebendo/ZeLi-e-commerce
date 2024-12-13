@@ -90,17 +90,18 @@ public class ClienteRepositoryTest
     [Fact]
     public async void Deve_Atualizar_Cliente()
     {
-        // Arrange
+        //Arrange
         var cliente = new Cliente ("Antigo Nome", "email@email.com", "Password1!");
         var repository = new ClienteRepository(_context);
         await repository.CreateClienteAsync(cliente);
 
         var clienteAtualizado = new Cliente ("Novo Nome", "email@aaaemail.com", "Password1!");
-        // Act
+
+        //Act
         await repository.UpdateCliente(clienteAtualizado, cliente.ClienteId);
         clienteAtualizado.ClienteId = cliente.ClienteId;
 
-        // Assert
+        //Assert
         Assert.NotNull(clienteAtualizado);
 
         Assert.Equal(cliente.Nome, clienteAtualizado.Nome);
@@ -110,20 +111,17 @@ public class ClienteRepositoryTest
     [Fact]
     public async Task Deve_Excluir_Cliente()
     {
-        // Arrange
+        //Arrange
         var cliente = new Cliente("shaulin", "zeze@botijao.com", "Password1!");
         var repository = new ClienteRepository(_context);
         await repository.CreateClienteAsync(cliente);
 
-        // Act
+        //Act
         var clienteDeletado = await repository.DeleteCliente(cliente.ClienteId);
 
         // Assert
         Assert.False(clienteDeletado.Ativo, "O campo Ativo deveria estar como false após a exclusão.");
-
-        // Agora, ao tentar pegar o cliente novamente, o filtro global não o encontrará,
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await repository.GetClienteByIdAsync(cliente.ClienteId)
-        );
+        var clienteInativo = await repository.GetClienteByIdAsync(cliente.ClienteId);
+        Assert.Null(clienteInativo);
     }
 }
