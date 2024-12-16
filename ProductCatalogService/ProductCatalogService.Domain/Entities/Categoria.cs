@@ -11,7 +11,7 @@ namespace ProductCatalogService.Domain.Entities
             ValidateDomain(nome, descricao);
         }
 
-        public int CategoriaID { get; private set; }
+        public int CategoriaID { get; set; }
         public string Nome { get; private set; }
         public string Descricao { get; private set; }
         public bool Ativo { get; set; } = true;

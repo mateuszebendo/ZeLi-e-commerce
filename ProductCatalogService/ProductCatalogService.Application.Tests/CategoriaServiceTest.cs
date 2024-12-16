@@ -7,6 +7,7 @@ using ProductCatalogService.Application.Profiles;
 using ProductCatalogService.Application.Services;
 using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Domain.Entities;
+using ProductCatalogService.Application.Exceptions;
 
 namespace ProductCatalogService.Application.Tests
 {
@@ -33,7 +34,13 @@ namespace ProductCatalogService.Application.Tests
             Categoria categoria = _mapper.Map<Categoria>(createCategoriaDto);
 
             Mock<ICategoriaRepository> mock = new Mock<ICategoriaRepository>();
-            mock.Setup(c => c.AddAsync(categoria)).ReturnsAsync(categoria);
+            mock.Setup(repo => repo.AddAsync(It.IsAny<Categoria>()))
+                .ReturnsAsync((Categoria c) =>
+                {
+                    c.CategoriaID = 1;
+                    return c;
+                });
+
             ICategoriaRepository repository = mock.Object;
 
             CategoriaService service = new CategoriaService(repository, _mapper);
@@ -47,7 +54,7 @@ namespace ProductCatalogService.Application.Tests
             detailsCategoriaDto.Nome.ShouldBe(categoria.Nome);
             detailsCategoriaDto.Descricao.ShouldBe(categoria.Descricao);
 
-            mock.Verify(repo => repo.AddAsync(categoria), Times.Once);
+            mock.Verify(repo => repo.AddAsync(It.IsAny<Categoria>()), Times.Once);
         }
 
         [Fact]
@@ -58,7 +65,7 @@ namespace ProductCatalogService.Application.Tests
             CategoriaService service = new CategoriaService(repository, _mapper);
 
             //Act & Assert
-            await Should.ThrowAsync<ArgumentException>(async () =>
+            await Should.ThrowAsync<CategoriaInvalidaException>(async () =>
                 await service.RegisterNewCategoriaAsync(null));
         }
 
@@ -158,16 +165,31 @@ namespace ProductCatalogService.Application.Tests
         }
 
         [Fact]
-        public async Task AtualizaCategoria_QuandoDadosInvalidos_RetornaArgumentException()
+        public async Task AtualizaCategoria_QuandoCategoriaInvalida_RetornaCategoriaInvalidaException()
         {
             //Arrange
             Mock<ICategoriaRepository> mock = new Mock<ICategoriaRepository>();
             CategoriaService service = new CategoriaService(mock.Object, _mapper);
 
             //Act & Arrange 
+            await Should.ThrowAsync<CategoriaInvalidaException>(async () =>
+            {
+                await service.UpdateCategoriaAsync(null, It.IsAny<int>());
+            });
+        }
+
+        [Fact]
+        public async Task AtualizaCategoria_QuandoIdInvalido_RetornaArgumentException()
+        {
+            //Arrange
+            Mock<ICategoriaRepository> mock = new Mock<ICategoriaRepository>();
+            UpdateCategoriaDto categoria = new Fixture().Create<UpdateCategoriaDto>();
+            CategoriaService service = new CategoriaService(mock.Object, _mapper);
+
+            //Act & Arrange 
             await Should.ThrowAsync<ArgumentException>(async () =>
             {
-                await service.UpdateCategoriaAsync(null, 0);
+                await service.UpdateCategoriaAsync(categoria, 0);
             });
         }
 
@@ -178,6 +200,7 @@ namespace ProductCatalogService.Application.Tests
             Categoria categoria = new Fixture().Create<Categoria>();
 
             Mock<ICategoriaRepository> mock = new Mock<ICategoriaRepository>();
+            mock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(categoria);
             mock.Setup(r => r.RemoveAsync(categoria.CategoriaID)).ReturnsAsync(true);
             ICategoriaRepository repository = mock.Object;
 

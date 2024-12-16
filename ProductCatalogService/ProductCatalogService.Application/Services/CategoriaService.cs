@@ -2,6 +2,8 @@
 using ProductCatalogService.Application.Contracts;
 using ProductCatalogService.Application.Dtos;
 using ProductCatalogService.Domain.Contracts;
+using ProductCatalogService.Domain.Entities;
+using ProductCatalogService.Application.Exceptions;
 
 namespace ProductCatalogService.Application.Services
 {
@@ -16,28 +18,70 @@ namespace ProductCatalogService.Application.Services
             _mapper = mapper;
         }
 
-        public Task<DetailsCategoriaDto> RegisterNewCategoriaAsync(CreateCategoriaDto createCategoriaDto)
+        public async Task<DetailsCategoriaDto> RegisterNewCategoriaAsync(CreateCategoriaDto createCategoriaDto)
         {
-            throw new NotImplementedException();
+            if (createCategoriaDto == null) throw new CategoriaInvalidaException();
+
+            var categoria = _mapper.Map<Categoria>(createCategoriaDto);
+            categoria = await _repository.AddAsync(categoria);
+
+            if (categoria == null) throw new Exception();
+
+            var detailsCategoriaDto = _mapper.Map<DetailsCategoriaDto>(categoria);
+
+            return detailsCategoriaDto;
         }
 
-        public Task<List<DetailsCategoriaDto>> GetAllCategoriasAtivasAsync()
+        public async Task<List<DetailsCategoriaDto>> GetAllCategoriasAtivasAsync()
         {
-            throw new NotImplementedException();
+            var categorias = await _repository.GetAllAsync();
+            List<DetailsCategoriaDto> detailsCategoriaDtos = new List<DetailsCategoriaDto>();
+            foreach(var categoria in categorias)
+            {
+                detailsCategoriaDtos.Add(_mapper.Map<DetailsCategoriaDto>(categoria));
+            }
+
+            return detailsCategoriaDtos;
         }
 
-        public Task<DetailsCategoriaDto> GetCategoriaByIdAsync(int id)
+        public async Task<DetailsCategoriaDto> GetCategoriaByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            if (id <= 0) throw new ArgumentException();
+
+            var categoria = await _repository.GetByIdAsync(id);
+            var detailsCategoriaDto = _mapper.Map<DetailsCategoriaDto>(categoria);
+
+            return detailsCategoriaDto;
         }
 
-        public Task<DetailsCategoriaDto> UpdateCategoriaAsync(UpdateCategoriaDto categoriaDto, int id)
+        public async Task<DetailsCategoriaDto> UpdateCategoriaAsync(UpdateCategoriaDto categoriaDto, int id)
         {
-            throw new NotImplementedException();
+            if (categoriaDto == null) throw new CategoriaInvalidaException();
+
+            if(id <= 0) throw new ArgumentException();
+
+            var categoria = _mapper.Map<Categoria>(categoriaDto);
+            categoria = await _repository.UpdateAsync(categoria, id);
+
+            DetailsCategoriaDto detailsCategoriaDto = _mapper.Map<DetailsCategoriaDto>(categoria);
+            detailsCategoriaDto.Id = id;
+
+            return detailsCategoriaDto;
         }
-        public Task<ReadCategoriaDto> DisableCategoriaByIdAsync(int id)
+        public async Task<ReadCategoriaDto> DisableCategoriaByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            if (id <= 0) throw new ArgumentException();
+
+            var categoriaDeletada = await _repository.GetByIdAsync(id);
+            var result = await _repository.RemoveAsync(id);
+
+            if(result)
+            {
+                ReadCategoriaDto categoriaDto = _mapper.Map<ReadCategoriaDto>(categoriaDeletada);
+                return categoriaDto;
+            }
+
+            throw new Exception();
         }
     }
 }
