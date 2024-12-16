@@ -336,7 +336,8 @@ public class ClienteServiceTest
         var clienteDesativado = await service.DeleteCliente(clienteId);
 
         //Assert
-        Assert.NotNull(clienteDesativado);
+        Assert.NotNull(cliente);
+        Assert.Null(clienteDesativado);
 
         mockRepository.Verify(repo => repo.DeleteCliente(It.IsAny<int>()), Times.Once);
     }
@@ -349,10 +350,7 @@ public class ClienteServiceTest
         var mockRepository = new Mock<IClienteRepository>();
         var service = new ClienteService(mockRepository.Object, _mapper);
 
-        //Act
-        var clienteDesativado = await service.DeleteCliente(idInvalido);
-
-        //Assert
+        //Act e Assert
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => service.DeleteCliente(idInvalido));
         Assert.Equal($"Nenhum cliente encontrado com o Id {idInvalido}.", exception.Message);
     }

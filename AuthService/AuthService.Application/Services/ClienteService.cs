@@ -148,6 +148,14 @@ public class ClienteService : IClienteService
 
     public async Task<ClienteDto> DeleteCliente(int id)
     {
-        throw new NotImplementedException();
+        var clienteEntity = await _clienteRepository.GetClienteByIdAsync(id);
+
+        if (clienteEntity == null)
+            throw new KeyNotFoundException($"Nenhum cliente encontrado com o Id {id}.");
+
+        var clienteDesativado = await _clienteRepository.DeleteCliente(id);
+
+        var clienteDto = _mapper.Map<ClienteDto>(clienteDesativado);
+        return clienteDto;
     }
 }

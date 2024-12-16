@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AuthService.Api\AuthService.Api.csproj" />
     <ProjectReference Include="..\AuthService.Application\AuthService.Application.csproj" />
   </ItemGroup>
 
