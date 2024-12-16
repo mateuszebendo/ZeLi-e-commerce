@@ -41,12 +41,12 @@ namespace ProductCatalogService.Infra.Tests
         public async Task ObterCategorias_Deve_Retornar_Todas_Categorias()
         {
             // Arrange
-            List<Categoria> categorias = new Fixture().CreateMany<Categoria>(3).ToList();
+            List<Categoria> categorias = new Fixture().Build<Categoria>().With(c => c.Ativo, true).CreateMany<Categoria>().ToList();
             categorias.Count.ShouldBe(3);
 
             foreach (var categoria in categorias)
             {
-                await _context.Categorias.AddAsync(categoria);
+                _context.Categorias.Add(categoria);
             }
             await _context.SaveChangesAsync();
 

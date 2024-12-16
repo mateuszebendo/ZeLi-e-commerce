@@ -57,10 +57,13 @@ namespace ProductCatalogService.Infra.Tests
         {
             //Arrange
             Categoria categoria = new Fixture().Create<Categoria>();
-            await _context.Categorias.AddAsync(categoria);
+            _context.Categorias.Add(categoria);
             await _context.SaveChangesAsync();
 
-            Produto produtoOriginal = new Fixture().Build<Produto>().With(prod => prod.CategoriaId, categoria.CategoriaID).Create(); 
+            Produto produtoOriginal = new Fixture().Build<Produto>()
+                .With(prod => prod.CategoriaId, categoria.CategoriaID)
+                .With(prod => prod.Ativo, true)
+                .Create(); 
 
             _context.Add(produtoOriginal);
             await _context.SaveChangesAsync();
@@ -162,39 +165,36 @@ namespace ProductCatalogService.Infra.Tests
             await _context.Categorias.AddAsync(categoria);
             await _context.SaveChangesAsync();
 
-            var produtoOriginal = new Fixture().Build<Produto>().With(x => x.CategoriaId, categoria.CategoriaID).Create();
+            var produto = new Fixture()
+                .Build<Produto>()
+                .With(x => x.CategoriaId, categoria.CategoriaID)
+                .With(prod => prod.Ativo, true)
+                .Create();
 
-            await _context.Produtos.AddAsync(produtoOriginal);
+            await _context.Produtos.AddAsync(produto);
             await _context.SaveChangesAsync();
 
-            var produtoAtualizado = new Fixture().Build<Produto>()
-                .With(x => x.CategoriaId, categoria.CategoriaID)
-                .With(x => x.ProdutoID, produtoOriginal.ProdutoID)
-                .Create();
+            produto.Update(
+            nome: "Nome Atualizado",
+            descricao: "Descrição Atualizada",
+            preco: 150.0,
+            estoque: 75.0,
+            categoriaId: 2,
+            imagemUrl: "imagem_atualizada.jpg"
+            );
 
 
             //Act
-            var produtoPreAlteracoes = await _repository.GetByIdAsync(produtoOriginal.ProdutoID);
-            produtoPreAlteracoes.ShouldNotBeNull();
-            produtoPreAlteracoes.Nome.ShouldBe(produtoOriginal.Nome);
-            produtoPreAlteracoes.Descricao.ShouldBe(produtoOriginal.Descricao);
-            produtoPreAlteracoes.Preco.ShouldBe(produtoOriginal.Preco);
-            produtoPreAlteracoes.Estoque.ShouldBe(produtoOriginal.Estoque);
-            produtoPreAlteracoes.Categoria.Nome.ShouldBe(produtoOriginal.Categoria.Nome);
-            produtoPreAlteracoes.Categoria.Descricao.ShouldBe(produtoOriginal.Categoria.Descricao);
-            produtoPreAlteracoes.ImagemURL.ShouldBe(produtoOriginal.ImagemURL);
-
-            var produtoPosAlteracoes = await _repository.UpdateAsync(produtoAtualizado, produtoOriginal.ProdutoID);
+            var produtoAtualizado = await _repository.UpdateAsync(produto, produto.ProdutoID);
 
             //Assert
-            produtoPosAlteracoes.ShouldNotBeNull();
-            produtoPosAlteracoes.Nome.ShouldBe(produtoAtualizado.Nome);
-            produtoPosAlteracoes.Descricao.ShouldBe(produtoAtualizado.Descricao);
-            produtoPosAlteracoes.Preco.ShouldBe(produtoAtualizado.Preco);
-            produtoPosAlteracoes.Estoque.ShouldBe(produtoAtualizado.Estoque);
-            produtoPosAlteracoes.Categoria.Nome.ShouldBe(produtoAtualizado.Categoria.Nome);
-            produtoPosAlteracoes.Categoria.Descricao.ShouldBe(produtoAtualizado.Categoria.Descricao);
-            produtoPosAlteracoes.ImagemURL.ShouldBe(produtoAtualizado.ImagemURL);
+            produtoAtualizado.ShouldNotBeNull();
+            produtoAtualizado.Nome.ShouldBe("Nome Atualizado");
+            produtoAtualizado.Descricao.ShouldBe("Descrição Atualizada");
+            produtoAtualizado.Preco.ShouldBe(150.0);
+            produtoAtualizado.Estoque.ShouldBe(75.0);
+            produtoAtualizado.CategoriaId.ShouldBe(2);
+            produtoAtualizado.ImagemURL.ShouldBe("imagem_atualizada.jpg");
         }
 
         [Fact]
@@ -205,7 +205,10 @@ namespace ProductCatalogService.Infra.Tests
             await _context.Categorias.AddAsync(categoria);
             await _context.SaveChangesAsync();
 
-            var produtoOriginal = new Fixture().Build<Produto>().With(prod => prod.CategoriaId, categoria.CategoriaID).Create();
+            var produtoOriginal = new Fixture().Build<Produto>()
+                .With(prod => prod.CategoriaId, categoria.CategoriaID)
+                .With(prod => prod.Ativo, true)
+                .Create();
 
             _context.Add(produtoOriginal);
             await _context.SaveChangesAsync();
