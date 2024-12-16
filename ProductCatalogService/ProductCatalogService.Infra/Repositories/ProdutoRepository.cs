@@ -99,7 +99,7 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async Task<bool> RemoveAsync(int id)
+        public async Task<Produto> RemoveAsync(int id)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace ProductCatalogService.Infra.Repositories
                 produto.Ativo = false;
                 await _context.SaveChangesAsync();
 
-                return true;
+                return produto;
             }
             catch (Exception ex)
             {

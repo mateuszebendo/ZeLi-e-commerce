@@ -106,7 +106,7 @@ namespace ProductCatalogService.Infra.Tests
         }
 
         [Fact]
-        public async Task DeletaCategoria_QuandoDeletada_RetornaTrueENaoEncontraNoBanco()
+        public async Task DeletaCategoria_QuandoDeletada_RetornaCategoriaDeletada()
         {
             //Arrange
             var categoria = new Fixture().Create<Categoria>();
@@ -115,12 +115,13 @@ namespace ProductCatalogService.Infra.Tests
             await _context.SaveChangesAsync();
 
             //Act 
-            bool deletouComSucesso = await _repository.RemoveAsync(categoria.CategoriaID);
-            var ex = await Assert.ThrowsAsync<Exception>(() => _repository.GetByIdAsync(categoria.CategoriaID));
+            Categoria categoriaDeletada = await _repository.RemoveAsync(categoria.CategoriaID);
 
             //Assert
-            deletouComSucesso.ShouldBeTrue();
-            ex.GetType().ShouldBe(typeof(Exception));
+            categoriaDeletada.ShouldNotBeNull();
+            categoriaDeletada.Nome.ShouldBe(categoria.Nome);
+            categoriaDeletada.Descricao.ShouldBe(categoria.Descricao);
+            categoriaDeletada.Ativo.ShouldBeFalse();
         }
     }
 }

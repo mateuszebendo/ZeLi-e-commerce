@@ -214,11 +214,17 @@ namespace ProductCatalogService.Infra.Tests
             await _context.SaveChangesAsync();
 
             //Act 
-            bool deletouComSucesso = await _repository.RemoveAsync(produtoOriginal.ProdutoID);
+            Produto produtoDeletado = await _repository.RemoveAsync(produtoOriginal.ProdutoID);
 
             //Assert 
-            Assert.True(deletouComSucesso);
-            await Assert.ThrowsAsync<Exception>(() => _repository.GetByIdAsync(produtoOriginal.ProdutoID));
+            produtoDeletado.ShouldNotBeNull();
+            produtoDeletado.Nome.ShouldBe(produtoOriginal.Nome);
+            produtoDeletado.Descricao.ShouldBe(produtoOriginal.Descricao);
+            produtoDeletado.Estoque.ShouldBe(produtoOriginal.Estoque);
+            produtoDeletado.ImagemURL.ShouldBe(produtoOriginal.ImagemURL);
+            produtoDeletado.Preco.ShouldBe(produtoOriginal.Preco);
+            produtoDeletado.CategoriaId.ShouldBe(produtoOriginal.CategoriaId);
+            produtoDeletado.Ativo.ShouldBeFalse();
         }
     }
 }

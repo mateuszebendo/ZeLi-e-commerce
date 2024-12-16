@@ -8,6 +8,6 @@ namespace ProductCatalogService.Domain.Contracts
         Task<Categoria> GetByIdAsync(int id);
         Task<List<Categoria>> GetAllAsync();
         Task<Categoria> UpdateAsync (Categoria Categoria, int id);
-        Task<bool> RemoveAsync(int id);
+        Task<Categoria> RemoveAsync(int id);
     }
 }

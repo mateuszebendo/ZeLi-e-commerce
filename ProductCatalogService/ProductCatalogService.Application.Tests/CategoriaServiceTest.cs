@@ -141,9 +141,10 @@ namespace ProductCatalogService.Application.Tests
         public async Task AtualizaCategoria_QuandoDadosValidos_RetornaDetailsCategoriaDtoComDadosAtualizados()
         {
             //Arrange
-            Categoria categoria = new Fixture().Create<Categoria>();
-
             UpdateCategoriaDto updateCategoriaDto = new Fixture().Create<UpdateCategoriaDto>();
+
+            Categoria categoria = _mapper.Map<Categoria>(updateCategoriaDto);
+            categoria.CategoriaID = 1;
 
             Mock<ICategoriaRepository> mock = new Mock<ICategoriaRepository>();
             mock.Setup(r => r.UpdateAsync(It.IsAny<Categoria>(), categoria.CategoriaID)).ReturnsAsync(categoria);
@@ -200,8 +201,11 @@ namespace ProductCatalogService.Application.Tests
             Categoria categoria = new Fixture().Create<Categoria>();
 
             Mock<ICategoriaRepository> mock = new Mock<ICategoriaRepository>();
-            mock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(categoria);
-            mock.Setup(r => r.RemoveAsync(categoria.CategoriaID)).ReturnsAsync(true);
+            mock.Setup(r => r.RemoveAsync(categoria.CategoriaID)).ReturnsAsync(() =>
+            {
+                categoria.Ativo = false;
+                return categoria;
+            });
             ICategoriaRepository repository = mock.Object;
 
             CategoriaService service = new CategoriaService(repository, _mapper);

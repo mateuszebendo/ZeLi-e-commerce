@@ -91,7 +91,7 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async Task<bool> RemoveAsync(int id)
+        public async Task<Categoria> RemoveAsync(int id)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace ProductCatalogService.Infra.Repositories
                 categoria.Ativo = false;
                 await _context.SaveChangesAsync();
 
-                return true;
+                return categoria;
             }
             catch (Exception ex)
             {

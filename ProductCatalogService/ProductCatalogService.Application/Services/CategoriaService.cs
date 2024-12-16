@@ -25,8 +25,6 @@ namespace ProductCatalogService.Application.Services
             var categoria = _mapper.Map<Categoria>(createCategoriaDto);
             categoria = await _repository.AddAsync(categoria);
 
-            if (categoria == null) throw new Exception();
-
             var detailsCategoriaDto = _mapper.Map<DetailsCategoriaDto>(categoria);
 
             return detailsCategoriaDto;
@@ -72,16 +70,10 @@ namespace ProductCatalogService.Application.Services
         {
             if (id <= 0) throw new ArgumentException();
 
-            var categoriaDeletada = await _repository.GetByIdAsync(id);
-            var result = await _repository.RemoveAsync(id);
+            var categoria = await _repository.RemoveAsync(id);
 
-            if(result)
-            {
-                ReadCategoriaDto categoriaDto = _mapper.Map<ReadCategoriaDto>(categoriaDeletada);
-                return categoriaDto;
-            }
-
-            throw new Exception();
+            ReadCategoriaDto categoriaDto = _mapper.Map<ReadCategoriaDto>(categoria);
+            return categoriaDto;
         }
     }
 }
