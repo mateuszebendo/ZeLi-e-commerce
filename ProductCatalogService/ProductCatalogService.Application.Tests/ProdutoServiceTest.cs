@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Moq;
-using ProductCatalogService.Application.Profiles;
 using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Domain.Entities;
 using AutoFixture;
@@ -8,6 +7,7 @@ using ProductCatalogService.Application.Services;
 using ProductCatalogService.Application.Dtos;
 using Shouldly;
 using ProductCatalogService.Application.Exceptions;
+using ProductCatalogService.Application.Mapping;
 
 namespace ProductCatalogService.Application.Tests
 {
@@ -20,7 +20,7 @@ namespace ProductCatalogService.Application.Tests
         {
             var configuration = new MapperConfiguration(cfg =>
             {
-                cfg.AddProfile<ProdutoProfile>();
+                cfg.AddProfile<DomainToDtoMappingProfile>();
             });
             _mapper = configuration.CreateMapper();
 
@@ -31,13 +31,9 @@ namespace ProductCatalogService.Application.Tests
         public async Task CriaProduto_QuandoDadosValidos_RetornaDetailsProdutoDto()
         {
             //Arrange
-            Produto produto = new Fixture().Create<Produto>();
+            Produto produto = new Fixture().Build<Produto>().With(p => p.ProdutoID, 1).Create();
             CreateProdutoDto createProdutoDto = _mapper.Map<CreateProdutoDto>(produto);
-            _mock.Setup(repo => repo.AddAsync(It.IsAny<Produto>())).ReturnsAsync((Produto p) =>
-            {
-                p.ProdutoID = 1;
-                return p;
-            });
+            _mock.Setup(repo => repo.AddAsync(It.IsAny<Produto>())).ReturnsAsync(produto);
             ProdutoService service = new(_mapper, _mock.Object);
 
             //Act 
@@ -158,9 +154,11 @@ namespace ProductCatalogService.Application.Tests
         public async Task AtualizaProduto_QuandoDadosValidos_RetornaDetailsProdutoDto()
         {
             //Arrange
-            UpdateProdutoDto produtoUpdateDto = new Fixture().Create<UpdateProdutoDto>();
-            Produto produto = _mapper.Map<Produto>(produtoUpdateDto);
-            produto.ProdutoID = 1;
+            Produto produto = new Fixture()
+                .Build<Produto>()
+                .With(p => p.ProdutoID, 1)
+                .Create();
+            UpdateProdutoDto produtoUpdateDto = _mapper.Map<UpdateProdutoDto>(produto);
 
             _mock.Setup(repo => repo.UpdateAsync(It.IsAny<Produto>(), It.IsAny<int>())).ReturnsAsync(produto);
 

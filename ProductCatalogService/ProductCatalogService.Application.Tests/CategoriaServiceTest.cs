@@ -3,11 +3,11 @@ using Moq;
 using AutoFixture;
 using Shouldly;
 using ProductCatalogService.Application.Dtos;
-using ProductCatalogService.Application.Profiles;
 using ProductCatalogService.Application.Services;
 using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Domain.Entities;
 using ProductCatalogService.Application.Exceptions;
+using ProductCatalogService.Application.Mapping;
 
 namespace ProductCatalogService.Application.Tests
 {
@@ -19,7 +19,7 @@ namespace ProductCatalogService.Application.Tests
         {
             MapperConfiguration configuration = new MapperConfiguration(cfg =>
             {
-                cfg.AddProfile<CategoriaProfile>();
+                cfg.AddProfile<DomainToDtoMappingProfile>();
             });
 
             _mapper = configuration.CreateMapper();

@@ -2,11 +2,8 @@
 using ProductCatalogService.Application.Contracts;
 using ProductCatalogService.Application.Dtos;
 using ProductCatalogService.Domain.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ProductCatalogService.Application.Exceptions;
+using ProductCatalogService.Domain.Entities;
 
 namespace ProductCatalogService.Application.Services
 {
@@ -21,29 +18,59 @@ namespace ProductCatalogService.Application.Services
             _repository = repository;
         }
 
-        public Task<ReadProdutoDto> DisableProdutoByIdAsync(int id)
+        public async Task<DetailsProdutoDto> RegisterNewProdutoAsync(CreateProdutoDto createProdutoDto)
         {
-            throw new NotImplementedException();
+            if (createProdutoDto == null) throw new ProdutoInvalidoException();
+
+            var produto = _mapper.Map<Produto>(createProdutoDto);
+            produto = await _repository.AddAsync(produto);
+
+            DetailsProdutoDto produtoDto = _mapper.Map<DetailsProdutoDto>(produto);
+
+            return produtoDto;
+        }
+        public async Task<DetailsProdutoDto> GetProdutoByIdAsync(int id)
+        {
+            if (id <= 0) throw new ArgumentException();
+
+            var produto = await _repository.GetByIdAsync(id);
+
+            DetailsProdutoDto produtoDto = _mapper.Map<DetailsProdutoDto>(produto);
+
+            return produtoDto;
+        }
+        public async Task<List<DetailsProdutoDto>> GetAllProdutosAtivosAsync()
+        {
+            var produtos = await _repository.GetAllAsync();
+
+            List<DetailsProdutoDto> produtosDto = _mapper.Map<List<DetailsProdutoDto>>(produtos);
+
+            return produtosDto;
         }
 
-        public Task<List<DetailsProdutoDto>> GetAllProdutosAtivosAsync()
+        public async Task<DetailsProdutoDto> UpdateProdutoAsync(UpdateProdutoDto produtoDto, int id)
         {
-            throw new NotImplementedException();
-        }
+            if (produtoDto == null) throw new ProdutoInvalidoException();
+            if (id <= 0) throw new ArgumentException();
 
-        public Task<DetailsProdutoDto> GetProdutoByIdAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
+            var produto = _mapper.Map<Produto>(produtoDto);
 
-        public Task<DetailsProdutoDto> RegisterNewProdutoAsync(CreateProdutoDto createProdutoDto)
-        {
-            throw new NotImplementedException();
-        }
+            produto = await _repository.UpdateAsync(produto, id);
 
-        public Task<DetailsProdutoDto> UpdateProdutoAsync(UpdateProdutoDto produtoDto, int id)
+            DetailsProdutoDto detailsProduto = _mapper.Map<DetailsProdutoDto>(produto);
+
+            return detailsProduto;
+
+        }
+        public async Task<ReadProdutoDto> DisableProdutoByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            if (id <= 0) throw new ArgumentException();
+
+            var produto = await _repository.RemoveAsync(id);
+
+            ReadProdutoDto produtoDto = _mapper.Map<ReadProdutoDto>(produto);
+
+            return produtoDto;
         }
     }
 }
