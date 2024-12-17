@@ -12,9 +12,9 @@ namespace AuthService.Infrastructure.Repositories;
 
 public class ClienteRepository : IClienteRepository
 {
-    private Context _context;
+    private AppDbContext _context;
 
-    public ClienteRepository(Context context)
+    public ClienteRepository(AppDbContext context)
     {
         _context = context;
     }

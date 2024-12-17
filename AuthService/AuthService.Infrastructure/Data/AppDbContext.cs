@@ -10,18 +10,10 @@ using System.Threading.Tasks;
 
 namespace AuthService.Infrastructure.Data;
 
-public class Context : DbContext
+public class AppDbContext : DbContext
 {
-    public Context(DbContextOptions<Context> options) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
-    }
-
-    public Context CriarContextoInMemory()
-    {
-        var options = new DbContextOptionsBuilder<Context>()
-            .UseInMemoryDatabase(databaseName: "TestDB_" + Guid.NewGuid())
-            .Options;
-        return new Context(options);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

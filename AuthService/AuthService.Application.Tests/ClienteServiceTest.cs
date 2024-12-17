@@ -62,7 +62,7 @@ public class ClienteServiceTest
 
         var service = new ClienteService(mockRepository.Object, mockMapper.Object);
 
-        // Act & Assert
+        //Act e Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateClienteAsync(clienteDto));
         Assert.Equal("Já existe um cliente com este email.", exception.Message);
 

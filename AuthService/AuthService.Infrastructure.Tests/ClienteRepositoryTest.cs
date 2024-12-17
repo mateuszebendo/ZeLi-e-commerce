@@ -8,14 +8,14 @@ namespace AuthService.Infrastructure.Tests;
 
 public class ClienteRepositoryTest
 {
-    private readonly Context _context;
+    private readonly AppDbContext _context;
 
     public ClienteRepositoryTest()
     {
-        var options = new DbContextOptionsBuilder<Context>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
-        _context = new Context(options);
+        _context = new AppDbContext(options);
     }
 
 
