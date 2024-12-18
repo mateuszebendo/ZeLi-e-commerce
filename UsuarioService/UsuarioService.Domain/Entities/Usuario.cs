@@ -1,35 +1,31 @@
-﻿using AuthService.Domain.Validation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using UsuarioService.Domain.Validation;
 
-namespace AuthService.Domain.Entities;
+namespace UsuarioService.Domain.Entities;
 
-public class Cliente
-{   
-    public int ClienteId { get; set; }
-    public string Nome { get;  set; }
+public class Usuario
+{
+    public int Id { get; set; }
+    public string Nome { get; set; }
     public string Email { get; set; }
     public string Senha { get; set; }
     public DateTime DataCadastro { get; set; }
     public bool Ativo { get; set; }
 
-    //public ICollection<Endereco> Enderecos { get; private set; }
-    //public ICollection<Carrinho> Carrinho  {get; private set; }
-    //public ICollection<Pedido> Pedidos { get; private set; }
-    //public ICollection<MetodoPagamento> MetodoPagamentos { get; privateset; }
 
-    public Cliente(string nome, string email, string senha)
+    public Usuario(string nome, string email, string senha)
     {
         ValidateDomain(nome, email, senha);
         DataCadastro = DateTime.UtcNow;
         Ativo = true;
     }
 
-    public Cliente()
+    public Usuario()
     {
     }
 
@@ -66,5 +62,4 @@ public class Cliente
 
     private static readonly Regex SenhaRegex = new Regex(@"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    
 }
