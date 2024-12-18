@@ -71,6 +71,8 @@ namespace ProductCatalogService.Infra.Repositories
         {
             try
             {
+                categoriaAtualizada.CategoriaID = id;
+
                 var categoriaExistente = await _context.Categorias
                     .FirstOrDefaultAsync(p => p.CategoriaID == categoriaAtualizada.CategoriaID);
 

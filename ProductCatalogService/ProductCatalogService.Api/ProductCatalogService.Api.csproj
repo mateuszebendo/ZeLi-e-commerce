@@ -19,11 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ProductCatalogService.Infra\ProductCatalogService.Infra.csproj" />
+    <ProjectReference Include="..\ProductCatalogService.Application\ProductCatalogService.Application.csproj" />
   </ItemGroup>
 
 </Project>

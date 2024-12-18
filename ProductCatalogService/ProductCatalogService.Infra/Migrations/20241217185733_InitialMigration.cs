@@ -17,8 +17,9 @@ namespace ProductCatalogService.Infra.Migrations
                 {
                     CategoriaID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nome = table.Column<string>(type: "text", nullable: false),
-                    Descricao = table.Column<string>(type: "text", nullable: false)
+                    Nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Descricao = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Ativo = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -31,28 +32,29 @@ namespace ProductCatalogService.Infra.Migrations
                 {
                     ProdutoID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nome = table.Column<string>(type: "text", nullable: false),
-                    Descricao = table.Column<string>(type: "text", nullable: false),
+                    Nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Descricao = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     Preco = table.Column<double>(type: "double precision", nullable: false),
                     Estoque = table.Column<double>(type: "double precision", nullable: false),
-                    CategoriaID = table.Column<int>(type: "integer", nullable: false),
-                    ImagemURL = table.Column<string>(type: "text", nullable: false)
+                    CategoriaId = table.Column<int>(type: "integer", nullable: false),
+                    ImagemURL = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Ativo = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Produtos", x => x.ProdutoID);
                     table.ForeignKey(
-                        name: "FK_Produtos_Categorias_CategoriaID",
-                        column: x => x.CategoriaID,
+                        name: "FK_Produtos_Categorias_CategoriaId",
+                        column: x => x.CategoriaId,
                         principalTable: "Categorias",
                         principalColumn: "CategoriaID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Produtos_CategoriaID",
+                name: "IX_Produtos_CategoriaId",
                 table: "Produtos",
-                column: "CategoriaID");
+                column: "CategoriaId");
         }
 
         /// <inheritdoc />

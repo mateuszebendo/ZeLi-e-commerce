@@ -24,7 +24,9 @@ namespace ProductCatalogService.Application.Mapping
                 .ReverseMap();
 
             CreateMap<CreateCategoriaDto, Categoria>();
-            CreateMap<UpdateCategoriaDto, Categoria>();
+            CreateMap<DetailsCategoriaDto, CreateCategoriaDto>();
+            CreateMap<UpdateCategoriaDto, Categoria>()
+                .ReverseMap();
             CreateMap<Categoria, ReadCategoriaDto>();
             CreateMap<Categoria, DetailsCategoriaDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.CategoriaID));
