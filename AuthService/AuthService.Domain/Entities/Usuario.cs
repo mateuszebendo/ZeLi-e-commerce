@@ -8,28 +8,19 @@ using System.Threading.Tasks;
 
 namespace AuthService.Domain.Entities;
 
-public class Cliente
+public class Usuario
 {   
-    public int ClienteId { get; set; }
+    public int Id { get; set; }
     public string Nome { get;  set; }
     public string Email { get; set; }
     public string Senha { get; set; }
-    public DateTime DataCadastro { get; set; }
-    public bool Ativo { get; set; }
 
-    //public ICollection<Endereco> Enderecos { get; private set; }
-    //public ICollection<Carrinho> Carrinho  {get; private set; }
-    //public ICollection<Pedido> Pedidos { get; private set; }
-    //public ICollection<MetodoPagamento> MetodoPagamentos { get; privateset; }
-
-    public Cliente(string nome, string email, string senha)
+    public Usuario(string nome, string email, string senha)
     {
         ValidateDomain(nome, email, senha);
-        DataCadastro = DateTime.UtcNow;
-        Ativo = true;
     }
 
-    public Cliente()
+    public Usuario()
     {
     }
 

@@ -16,11 +16,12 @@ public class AppDbContext : DbContext
     {
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    /*
+      protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Cliente>().HasQueryFilter(c => c.Ativo);
+        modelBuilder.Entity<Usuario>().HasQueryFilter(c => c.Ativo);
         base.OnModelCreating(modelBuilder);
     }
-
-    public DbSet<Cliente>  Clientes {  get; set; }
+    */
+    public DbSet<Usuario>  Usuarios {  get; set; }
 }

@@ -13,8 +13,8 @@ public class DomainToDTOMappingProfile : Profile
 {
     public DomainToDTOMappingProfile()
     {
-        CreateMap<Cliente, ClienteDto>().ReverseMap();
-        CreateMap<Cliente, ClienteCreateDto>().ReverseMap();
-        CreateMap<Cliente, ClienteUpdateDto>().ReverseMap();
+        CreateMap<Usuario, UsuarioDto>().ReverseMap();
+        CreateMap<Usuario, UsuarioCreateDto>().ReverseMap();
+        CreateMap<UsuarioDto, UsuarioLoginResponseDto>().ReverseMap();
     }
 }

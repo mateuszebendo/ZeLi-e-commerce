@@ -10,76 +10,37 @@ using System.Threading.Tasks;
 
 namespace AuthService.Infrastructure.Repositories;
 
-public class ClienteRepository : IClienteRepository
+public class AuthRepository : IAuthRepository
 {
     private AppDbContext _context;
 
-    public ClienteRepository(AppDbContext context)
+    public AuthRepository(AppDbContext context)
     {
         _context = context;
     }
     
-    public async Task<Cliente> CreateClienteAsync(Cliente cliente)
+    public async Task<Usuario> CreateUsuarioAsync(Usuario cliente)
     {
-        await _context.Clientes.AddAsync(cliente);
+        await _context.Usuarios.AddAsync(cliente);
         await _context.SaveChangesAsync();
         return cliente;
 
     }
 
-    public async Task<IEnumerable<Cliente>> GetAllClientesAsync()
+    public async Task<Usuario> GetUsuarioByIdAsync(int id)
     {
-        return await _context.Clientes.ToListAsync();
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(c => c.Id == id);
+        return usuario;
     }
 
-    public async Task<Cliente> GetClienteByIdAsync(int id)
+    public async Task<Usuario> GetUsuarioByEmailAsync(string email)
     {
-        var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == id);
-        return cliente;
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(c => c.Email == email);
+        return usuario;
     }
 
-    public async Task<Cliente> GetClienteByEmailAsync(string email)
-    {
-        var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Email == email);
-        return cliente;
-    }
-
-    public async Task<Cliente> UpdateClienteAsync(Cliente cliente, int id)
-    {
-        var clienteToUpdate = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == id);
-
-        if (clienteToUpdate == null)
-            return null;
-
-        clienteToUpdate.Nome = cliente.Nome;
-        clienteToUpdate.Email = cliente.Email;
- 
-        await _context.SaveChangesAsync();
-        return clienteToUpdate;
-    }
-
-    public async Task<Boolean> UpdateSenha(int clienteId, string novaSenha)
-    {
-        var clienteToUpdate = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == clienteId);
-
-        if (clienteToUpdate == null)
-            return false;
-
-        clienteToUpdate.Senha = novaSenha;
-
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<Cliente> DeleteCliente(int id)
-    {
-        var clienteToDelete = await _context.Clientes.FirstOrDefaultAsync(c => c.ClienteId == id);
-
-        if (clienteToDelete == null)
-            return null;
-
-        clienteToDelete.Ativo = false;
-        await _context.SaveChangesAsync();
-        return clienteToDelete;
+    public async Task<Usuario?> GetUsuarioLogin(string email, string senha) 
+    { 
+        return await _context.Usuarios.FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower() && x.Senha == senha);
     }
 }

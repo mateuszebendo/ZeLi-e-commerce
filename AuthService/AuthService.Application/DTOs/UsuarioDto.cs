@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace AuthService.Application.DTOs
 {
-    public class UpdateSenhaDto
+    public class UsuarioDto
     {
-        public int ClienteId { get; set; }
+        public int Id { get; set; }
+        public string Nome { get; set; }
+        public string Email { get; set; }
     }
 }

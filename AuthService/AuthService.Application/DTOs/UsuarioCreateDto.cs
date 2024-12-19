@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AuthService.Application.DTOs;
 
-public class ClienteCreateDto
+public class UsuarioCreateDto
 {
     [Required(ErrorMessage = "Nome é obrigatório.")]
     [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$",
@@ -23,7 +23,7 @@ public class ClienteCreateDto
     ErrorMessage = "Senha inválida. A senha deve ter no mínimo 8 caracteres, contendo pelo menos uma letra maiúscula, um numero e um caractere especial.")]
     public string Senha { get; set; }
 
-    public ClienteCreateDto(string nome, string email, string senha)
+    public UsuarioCreateDto(string nome, string email, string senha)
     {
         Nome = nome;
         Email = email;
