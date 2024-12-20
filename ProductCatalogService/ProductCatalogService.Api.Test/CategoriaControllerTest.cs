@@ -8,6 +8,7 @@ using ProductCatalogService.Api.Controllers;
 using ProductCatalogService.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Shouldly;
+using Microsoft.AspNetCore.Http;
 
 namespace ProductCatalogService.Api.Test
 {
@@ -46,11 +47,28 @@ namespace ProductCatalogService.Api.Test
 
             var createdResult = result.Result as CreatedAtActionResult;
 
-            createdResult.StatusCode.ShouldBe(201);
+            createdResult.StatusCode.ShouldBe(StatusCodes.Status201Created);
 
             createdResult.Value.ShouldBeEquivalentTo(categoriaDetails);
 
             _mock.Verify(s => s.RegisterNewCategoriaAsync(It.IsAny<CreateCategoriaDto>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task CriaCategoria_QuandoDadosInvalidos_Retorna500BadRequest()
+        {
+            //Arrange 
+            CategoriasController controller = new(_mock.Object);
+
+            //Act 
+            ActionResult<DetailsCategoriaDto> result = await controller.PostCategoria(null);
+
+            //Assert 
+            result.Result.ShouldBeOfType<BadRequestObjectResult>();
+
+            var badRequestResult = result.Result as BadRequestObjectResult;
+
+            badRequestResult.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
         }
 
         [Fact]
@@ -71,11 +89,51 @@ namespace ProductCatalogService.Api.Test
 
             var okResult = result.Result as OkObjectResult;
 
-            okResult.StatusCode.ShouldBe(200);
+            okResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
 
             okResult.Value.ShouldBeEquivalentTo(categoriaDto);
 
             _mock.Verify(s => s.GetCategoriaByIdAsync(It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task ObtemCategoriaPorId_QuandoCategoriaInexistente_Retorna404NotFound()
+        {
+            //Arrange
+            int idInvalido = 555;
+
+            _mock.Setup(s => s.GetCategoriaByIdAsync(idInvalido)).ReturnsAsync((DetailsCategoriaDto?)null);
+
+            CategoriasController controller = new(_mock.Object);
+
+            //Act
+            ActionResult<DetailsCategoriaDto> result = await controller.GetCategoriaById(idInvalido);
+
+            //Assert
+            result.Result.ShouldBeOfType<NotFoundResult>();
+
+            var notFoundResult = result.Result as NotFoundResult;
+
+            notFoundResult.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
+        }
+
+        [Fact]
+        public async Task ObtemCategoriaPorId_QuandoIdInvalido_Retorna500BadRequest()
+        {
+            //Arrange
+            int idInvalido = -1;
+
+            CategoriasController controller = new(_mock.Object);
+
+            //Act
+            ActionResult<DetailsCategoriaDto> result = await controller.GetCategoriaById(idInvalido);
+
+            //Assert
+            result.Result.ShouldBeOfType<BadRequestResult>();
+
+            var notFoundResult = result.Result as BadRequestResult;
+
+            notFoundResult.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
         }
 
         [Fact]
@@ -96,7 +154,7 @@ namespace ProductCatalogService.Api.Test
 
             var okResult = result.Result as OkObjectResult;
 
-            okResult.StatusCode.ShouldBe(200);
+            okResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
 
             okResult.Value.ShouldBeEquivalentTo(categorias);
 
@@ -123,11 +181,69 @@ namespace ProductCatalogService.Api.Test
 
             var okResult = result.Result as OkObjectResult;
 
-            okResult.StatusCode.ShouldBe(200);
+            okResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
 
             okResult.Value.ShouldBeEquivalentTo(detailsCategoria);
 
             _mock.Verify(s => s.UpdateCategoriaAsync(It.IsAny<UpdateCategoriaDto>(), It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task AtualizaCategoria_QuandoCategoriaInvalida_Retorna400BadRequest()
+        {
+            //Arrange
+            CategoriasController controller = new(_mock.Object);
+
+            //Act 
+            ActionResult<DetailsCategoriaDto> result = await controller.PutCategoria(null, 1); 
+
+            //Assert
+            result.Result.ShouldBeOfType<BadRequestResult>();
+
+            var badRequestResult = result.Result as BadRequestResult;
+
+            badRequestResult.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
+        }
+
+        [Fact]
+        public async Task AtualizaCategoria_QuandoIdInvalido_Retorna400BadRequest()
+        {
+            //Arrange
+            int idInvalido = -1;
+            UpdateCategoriaDto categoriaDto = new Fixture().Create<UpdateCategoriaDto>();
+            CategoriasController controller = new(_mock.Object);
+
+            //Act 
+            ActionResult<DetailsCategoriaDto> result = await controller.PutCategoria(categoriaDto, idInvalido);
+
+            //Assert
+            result.Result.ShouldBeOfType<BadRequestResult>();
+
+            var badRequestResult = result.Result as BadRequestResult;
+
+            badRequestResult.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
+        }
+
+        [Fact]
+        public async Task AtualizaCategoria_QuandoCategoriaInexistente_Retorna404NotFound()
+        {
+            //Arrange
+            int idInvalido = 555;
+            UpdateCategoriaDto categoriaDto = new Fixture().Create<UpdateCategoriaDto>();
+
+            _mock.Setup(s => s.UpdateCategoriaAsync(categoriaDto, idInvalido)).ReturnsAsync((DetailsCategoriaDto?)null);
+
+            CategoriasController controller = new(_mock.Object);
+
+            //Act
+            ActionResult<DetailsCategoriaDto> result = await controller.PutCategoria(categoriaDto, idInvalido);
+
+            //Assert
+            result.Result.ShouldBeOfType<NotFoundResult>();
+
+            var notFoundResult = result.Result as NotFoundResult;
+
+            notFoundResult.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
         }
 
         [Fact]
@@ -149,11 +265,49 @@ namespace ProductCatalogService.Api.Test
 
             var okResult = result.Result as OkObjectResult;
 
-            okResult.StatusCode.ShouldBe(200);
+            okResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
 
             okResult.Value.ShouldBeEquivalentTo(readCategoria);
 
             _mock.Verify(s => s.DisableCategoriaByIdAsync(It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task DesativaCategoria_QuandoIdInvalido_Retorna400BadRequest()
+        {
+            //Arrange
+            int idInvalido = -1;
+
+            CategoriasController controller = new(_mock.Object);
+
+            //Act 
+            ActionResult<ReadCategoriaDto> result = await controller.RemoveCategoria(idInvalido);
+
+            //Assert 
+            result.Result.ShouldBeOfType<BadRequestResult>();
+
+            var badRequestResult = result.Result as BadRequestResult;
+
+            badRequestResult.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
+        }
+
+        [Fact]
+        public async Task DesativaCategoria_QuandoCategoriaInexistente_Retorna404NotFound()
+        {
+            //Arrange 
+            int idInvalido = 555;
+            _mock.Setup(s => s.DisableCategoriaByIdAsync(idInvalido)).ReturnsAsync((ReadCategoriaDto?)null);
+            CategoriasController controller = new(_mock.Object);
+
+            //Act
+            ActionResult<ReadCategoriaDto> result = await controller.RemoveCategoria(idInvalido);
+
+            //Assert 
+            result.Result.ShouldBeOfType<NotFoundResult>();
+
+            var notFoundResult = result.Result as NotFoundResult;
+
+            notFoundResult.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
         }
     }
 }

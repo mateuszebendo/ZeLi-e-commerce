@@ -22,6 +22,7 @@ namespace ProductCatalogService.Application.Mapping
             CreateMap<Produto, DetailsProdutoDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ProdutoID))
                 .ReverseMap();
+            CreateMap<DetailsProdutoDto, CreateProdutoDto>();
 
             CreateMap<CreateCategoriaDto, Categoria>();
             CreateMap<DetailsCategoriaDto, CreateCategoriaDto>();

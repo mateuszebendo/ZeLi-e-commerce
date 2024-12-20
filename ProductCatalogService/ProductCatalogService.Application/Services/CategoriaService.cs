@@ -18,7 +18,7 @@ namespace ProductCatalogService.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<DetailsCategoriaDto> RegisterNewCategoriaAsync(CreateCategoriaDto createCategoriaDto)
+        public async Task<DetailsCategoriaDto?> RegisterNewCategoriaAsync(CreateCategoriaDto createCategoriaDto)
         {
             if (createCategoriaDto == null) throw new CategoriaInvalidaException();
 
@@ -30,7 +30,7 @@ namespace ProductCatalogService.Application.Services
             return detailsCategoriaDto;
         }
 
-        public async Task<List<DetailsCategoriaDto>> GetAllCategoriasAtivasAsync()
+        public async Task<List<DetailsCategoriaDto?>> GetAllCategoriasAtivasAsync()
         {
             var categorias = await _repository.GetAllAsync();
             List<DetailsCategoriaDto> detailsCategoriaDtos = new List<DetailsCategoriaDto>();
@@ -42,7 +42,7 @@ namespace ProductCatalogService.Application.Services
             return detailsCategoriaDtos;
         }
 
-        public async Task<DetailsCategoriaDto> GetCategoriaByIdAsync(int id)
+        public async Task<DetailsCategoriaDto?> GetCategoriaByIdAsync(int id)
         {
             if (id <= 0) throw new ArgumentException();
 
@@ -52,7 +52,7 @@ namespace ProductCatalogService.Application.Services
             return detailsCategoriaDto;
         }
 
-        public async Task<DetailsCategoriaDto> UpdateCategoriaAsync(UpdateCategoriaDto categoriaDto, int id)
+        public async Task<DetailsCategoriaDto?> UpdateCategoriaAsync(UpdateCategoriaDto categoriaDto, int id)
         {
             if (categoriaDto == null) throw new CategoriaInvalidaException();
 
@@ -66,7 +66,7 @@ namespace ProductCatalogService.Application.Services
 
             return detailsCategoriaDto;
         }
-        public async Task<ReadCategoriaDto> DisableCategoriaByIdAsync(int id)
+        public async Task<ReadCategoriaDto?> DisableCategoriaByIdAsync(int id)
         {
             if (id <= 0) throw new ArgumentException();
 
