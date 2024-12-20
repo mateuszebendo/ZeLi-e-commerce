@@ -12,6 +12,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace AuthService.Application.Services;
 
@@ -66,6 +67,7 @@ public class UsuarioService : IUsuarioService
     public async Task<UsuarioDto> GetUsuarioByIdAsync(int id) 
     {
         var usuarioEntity = await _authRepository.GetUsuarioByIdAsync(id);
+
 
         if (usuarioEntity == null)
             throw new KeyNotFoundException($"Nenhum usuario encontrado com o id {id}.");

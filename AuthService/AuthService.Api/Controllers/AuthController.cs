@@ -5,6 +5,7 @@ using AuthService.Domain.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AuthService.Api.Controllers;
 
@@ -49,6 +50,15 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUsuarioById(int id)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+        var userId = int.Parse(userIdClaim.Value);
+
+        if (id != userId)
+        {
+            return Forbid();
+        }
+
         var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
         if (usuario == null)
             return NotFound();
