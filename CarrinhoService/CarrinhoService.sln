@@ -1,0 +1,72 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0 - Tests", "0 - Tests", "{C5321FA8-8C27-4085-94FA-93527D7876F9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Presentation", "1 - Presentation", "{BEF3386E-E711-4AC5-82EB-464939DBAB8A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Domain", "2 - Domain", "{22CB5884-BFD3-4ED1-A4B1-EB5BEC0D7D83}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 - Application", "3 - Application", "{E21CA30D-D343-4094-BBFC-C2B1C7692B9B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - Infra", "4 - Infra", "{BA239A79-64F9-461F-A682-F67D038A7552}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 - Workers", "5 - Workers", "{7943CCEF-1F3C-4131-AEB6-270C90DA2EEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarrinhoService.Api", "CarrinhoService.Api\CarrinhoService.Api.csproj", "{BAB4B8D4-2095-4F47-BD1E-4098A5B27DC7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarrinhoService.Domain", "CarrinhoService.Domain\CarrinhoService.Domain.csproj", "{3BF43283-F579-4938-9959-951C06B72F30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarrinhoService.Application", "CarrinhoService.Application\CarrinhoService.Application.csproj", "{D946F563-6D4C-461C-B94F-6ECFC78A7692}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarrinhoService.Infra", "CarrinhoService.Infra\CarrinhoService.Infra.csproj", "{92325070-3E58-4338-9950-AB52A8EA1D60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarrinhoService.Application.Test", "CarrinhoService.Application.Test\CarrinhoService.Application.Test.csproj", "{2F7CB920-5874-4963-9C2B-27B3C3148F0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarrinhoService.Api.Test", "CarrinhoService.Api.Test\CarrinhoService.Api.Test.csproj", "{A4145C97-AE58-4521-892E-BE79C085660F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BAB4B8D4-2095-4F47-BD1E-4098A5B27DC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAB4B8D4-2095-4F47-BD1E-4098A5B27DC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAB4B8D4-2095-4F47-BD1E-4098A5B27DC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAB4B8D4-2095-4F47-BD1E-4098A5B27DC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BF43283-F579-4938-9959-951C06B72F30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BF43283-F579-4938-9959-951C06B72F30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BF43283-F579-4938-9959-951C06B72F30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BF43283-F579-4938-9959-951C06B72F30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D946F563-6D4C-461C-B94F-6ECFC78A7692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D946F563-6D4C-461C-B94F-6ECFC78A7692}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D946F563-6D4C-461C-B94F-6ECFC78A7692}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D946F563-6D4C-461C-B94F-6ECFC78A7692}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92325070-3E58-4338-9950-AB52A8EA1D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92325070-3E58-4338-9950-AB52A8EA1D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92325070-3E58-4338-9950-AB52A8EA1D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92325070-3E58-4338-9950-AB52A8EA1D60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F7CB920-5874-4963-9C2B-27B3C3148F0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F7CB920-5874-4963-9C2B-27B3C3148F0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F7CB920-5874-4963-9C2B-27B3C3148F0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F7CB920-5874-4963-9C2B-27B3C3148F0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4145C97-AE58-4521-892E-BE79C085660F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4145C97-AE58-4521-892E-BE79C085660F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4145C97-AE58-4521-892E-BE79C085660F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4145C97-AE58-4521-892E-BE79C085660F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BAB4B8D4-2095-4F47-BD1E-4098A5B27DC7} = {BEF3386E-E711-4AC5-82EB-464939DBAB8A}
+		{3BF43283-F579-4938-9959-951C06B72F30} = {22CB5884-BFD3-4ED1-A4B1-EB5BEC0D7D83}
+		{D946F563-6D4C-461C-B94F-6ECFC78A7692} = {E21CA30D-D343-4094-BBFC-C2B1C7692B9B}
+		{92325070-3E58-4338-9950-AB52A8EA1D60} = {BA239A79-64F9-461F-A682-F67D038A7552}
+		{2F7CB920-5874-4963-9C2B-27B3C3148F0F} = {C5321FA8-8C27-4085-94FA-93527D7876F9}
+		{A4145C97-AE58-4521-892E-BE79C085660F} = {C5321FA8-8C27-4085-94FA-93527D7876F9}
+	EndGlobalSection
+EndGlobal
