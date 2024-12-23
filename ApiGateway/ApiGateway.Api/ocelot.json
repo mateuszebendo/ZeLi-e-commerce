@@ -10,7 +10,7 @@
         }
       ],
       "UpstreamPathTemplate": "/gateway/auth/{url}",
-      "UpstreamHttpMethod": [ "Post"  ]
+      "UpstreamHttpMethod": [ "Post", "Get" ]
     },
     {
       "DownstreamPathTemplate": "/categorias/{id}",
@@ -26,6 +26,9 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Cargo": "Administrador"
       }
     }
   ],
