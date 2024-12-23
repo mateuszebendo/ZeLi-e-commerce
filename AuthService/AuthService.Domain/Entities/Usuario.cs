@@ -1,4 +1,5 @@
-﻿using AuthService.Domain.Validation;
+﻿using AuthService.Domain.Enums;
+using AuthService.Domain.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,17 +15,18 @@ public class Usuario
     public string Nome { get;  set; }
     public string Email { get; set; }
     public string Senha { get; set; }
+    public Cargo Cargo { get; set; }
 
-    public Usuario(string nome, string email, string senha)
+    public Usuario(string nome, string email, string senha, Cargo cargo)
     {
-        ValidateDomain(nome, email, senha);
+        ValidateDomain(nome, email, senha, cargo);
     }
 
     public Usuario()
     {
     }
 
-    private void ValidateDomain(string nome, string email, string senha)
+    private void ValidateDomain(string nome, string email, string senha, Cargo cargo)
     {
         bool nomeInvalido = !NomeRegex.IsMatch(nome);
 
@@ -47,6 +49,7 @@ public class Usuario
         Nome = nome;
         Email = email;
         Senha = senha;
+        Cargo = cargo;
     }
 
     private static readonly Regex NomeRegex = new Regex(@"^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$",

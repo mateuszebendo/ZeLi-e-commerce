@@ -1,0 +1,35 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/auth/{url}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5188
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/auth/{url}",
+      "UpstreamHttpMethod": [ "Post"  ]
+    },
+    {
+      "DownstreamPathTemplate": "/categorias/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5273
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categorias/{id}",
+      "UpstreamHttpMethod": [ "Post", "Get", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5000"
+  }
+}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AuthService.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,6 @@ namespace AuthService.Application.DTOs
         public int Id { get; set; }
         public string Nome { get; set; }
         public string Email { get; set; }
+        public Cargo Cargo { get; set; }
     }
 }

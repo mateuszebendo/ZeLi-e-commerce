@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AuthService.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -22,6 +23,7 @@ public class UsuarioCreateDto
     [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$",
     ErrorMessage = "Senha inválida. A senha deve ter no mínimo 8 caracteres, contendo pelo menos uma letra maiúscula, um numero e um caractere especial.")]
     public string Senha { get; set; }
+    public Cargo Cargo { get; } = Cargo.Cliente;
 
     public UsuarioCreateDto(string nome, string email, string senha)
     {
