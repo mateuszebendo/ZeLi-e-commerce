@@ -8,13 +8,6 @@ namespace CarrinhoService.Domain.Entities;
 
 public class Carrinho
 {
-    public int CarrinhoId { get; set; }
-
-    public int ClienteId { get; set; }
-
-    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
-
-    public string Status { get; set; } = "Aberto";
-
-    public ICollection<Item> Itens { get; set; } = new List<Item>();
+    public CarrinhoHeader CarrinhoHeader { get; set; } = new CarrinhoHeader();
+    public IEnumerable<ItemCarrinho> ItemsCarrinho { get; set; } = Enumerable.Empty<ItemCarrinho>();
 }

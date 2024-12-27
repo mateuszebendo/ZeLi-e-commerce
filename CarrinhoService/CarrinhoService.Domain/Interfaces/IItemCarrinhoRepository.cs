@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CarrinhoService.Infra.Repositories;
+namespace CarrinhoService.Domain.Interfaces;
 
-public class ItemRepository
+public interface IItemCarrinhoRepository
 {
 }

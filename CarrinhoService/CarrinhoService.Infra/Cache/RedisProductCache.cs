@@ -1,5 +1,8 @@
-﻿using CarrinhoService.Application.DTOs;
+﻿
+using AutoMapper;
+using CarrinhoService.Application.DTOs;
 using CarrinhoService.Application.Interfaces;
+using CarrinhoService.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Storage;
 using Newtonsoft.Json;
 using StackExchange.Redis;
@@ -15,42 +18,40 @@ public class RedisProductCache : IProdutoCache, IDisposable
 {
     private readonly ConnectionMultiplexer _redis;
     private readonly StackExchange.Redis.IDatabase _db;
+    private readonly IMapper _mapper;
 
     public RedisProductCache(string connectionString)
     {
-        // Exemplo: "localhost:6379"
         _redis = ConnectionMultiplexer.Connect(connectionString);
         _db = _redis.GetDatabase();
     }
 
-    public void UpdateProduto(int produtoId, string nome, decimal preco)
+    public void UpdateProduto(int produtoId, string nome, double preco)
     {
-        // Converter o objeto em JSON para armazenar no Redis
-        var produtoInfo = new ProdutoInfoDto
+        var produto = new Produto
         {
-            Id = produtoId,
+            ProdutoId = produtoId,
             Nome = nome,
             Preco = preco
         };
 
-        var json = JsonConvert.SerializeObject(produtoInfo);
+        var json = JsonConvert.SerializeObject(produto);
 
-        // Armazenar em Redis usando, por exemplo, a Key "produto:{id}"
         var key = $"produto:{produtoId}";
         _db.StringSet(key, json);
     }
 
-    public ProdutoInfoDto? GetProduto(int produtoId)
+    public Produto GetProduto(int produtoId)
     {
         var key = $"produto:{produtoId}";
         var json = _db.StringGet(key);
 
         if (json.IsNullOrEmpty)
         {
-            return null; // ou null indica que não existe no cache
+            return null; // null indica que não existe no cache
         }
 
-        return JsonConvert.DeserializeObject<ProdutoInfoDto>(json);
+        return JsonConvert.DeserializeObject<Produto>(json);
     }
 
     public void Dispose()

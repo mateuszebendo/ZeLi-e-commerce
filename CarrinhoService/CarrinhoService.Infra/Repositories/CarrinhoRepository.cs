@@ -27,20 +27,20 @@ public class CarrinhoRepository : ICarrinhoRepository
         return carrinho;
     }
 
-    public async Task AddItemAsync(int carrinhoId, Item item)
+    public async Task AddItemAsync(int carrinhoId, ItemCarrinho itemCarrinho)
     {
-        item.Carrinho.CarrinhoId = carrinhoId;
+        itemCarrinho.CarrinhoHeaderId = carrinhoId;
 
-        _context.ItensCarrinho.Add(item);
+        _context.ItensCarrinho.Add(itemCarrinho);
         await _context.SaveChangesAsync();
     }
-
+    
 
     public async Task<Carrinho> GetCarrinhoByIdAsync(int carrinhoId)
     {
         return await _context.Carrinhos
-            .Include(c => c.Itens)
-            .SingleOrDefaultAsync(c => c.CarrinhoId == carrinhoId);
+            .Include(c => c.ItemsCarrinho)
+            .SingleOrDefaultAsync(c => c.CarrinhoHeader.Id == carrinhoId);
     }
 
     public async Task<Carrinho> UpdateCarrinhoAsync(Carrinho carrinho)

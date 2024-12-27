@@ -10,7 +10,7 @@ namespace CarrinhoService.Domain.Interfaces;
 public interface ICarrinhoRepository
 {
     Task<Carrinho> CreateCarrinhoAsync(Carrinho carrinho);
-    Task AddItemAsync(int carrinhoId, Item item);
+    Task AddItemAsync(int carrinhoId, ItemCarrinho item);
     Task<Carrinho> GetCarrinhoByIdAsync(int carrinhoId);
     Task<Carrinho> UpdateCarrinhoAsync(Carrinho carrinho);
 }
