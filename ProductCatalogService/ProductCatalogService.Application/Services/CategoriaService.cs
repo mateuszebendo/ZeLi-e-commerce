@@ -4,6 +4,8 @@ using ProductCatalogService.Application.Dtos;
 using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Domain.Entities;
 using ProductCatalogService.Application.Exceptions;
+using ProductCatalogService.Domain.Pagination;
+using ProductCatalogService.Domain.ValueObjects;
 
 namespace ProductCatalogService.Application.Services
 {
@@ -30,16 +32,52 @@ namespace ProductCatalogService.Application.Services
             return detailsCategoriaDto;
         }
 
-        public async Task<List<DetailsCategoriaDto?>> GetAllCategoriasAtivasAsync()
+        public async Task<(MetaData, IEnumerable<DetailsCategoriaDto>)> GetCategoriasFiltroNomeAsync(CategoriasFiltroNome categoriasFiltro)
         {
-            var categorias = await _repository.GetAllAsync();
-            List<DetailsCategoriaDto> detailsCategoriaDtos = new List<DetailsCategoriaDto>();
-            foreach(var categoria in categorias)
+            var categorias = (await _repository.GetAllAsync()).AsQueryable(); 
+
+            if(!string.IsNullOrEmpty(categoriasFiltro.Nome))
             {
-                detailsCategoriaDtos.Add(_mapper.Map<DetailsCategoriaDto>(categoria));
+                categorias = categorias.Where(c => c.Nome.Contains(categoriasFiltro.Nome));
             }
 
-            return detailsCategoriaDtos;
+            var categoriasFiltradas = PagedList<Categoria>
+                .ToPagedList(categorias, categoriasFiltro.PageNumber, categoriasFiltro.PageSize);
+
+            var metadata = new MetaData()
+            {
+                TotalCount = categoriasFiltradas.TotalCount,
+                PageSize = categoriasFiltradas.PageSize,
+                CurrentPage = categoriasFiltradas.CurrentPage,
+                TotalPages = categoriasFiltradas.TotalPages,
+                HasNext = categoriasFiltradas.HasNext,
+                HasPrevious = categoriasFiltradas.HasPrevious
+            };
+
+            var tuplaRetornoService = (metadata, _mapper.Map<IEnumerable<DetailsCategoriaDto>>(categoriasFiltradas));
+
+            return tuplaRetornoService;
+        }
+
+        public async Task<(MetaData, IEnumerable<DetailsCategoriaDto>)> GetAllCategoriasAtivasPagedAsync(CategoriaParameters categoriaParameters)
+        {
+            var categorias = await _repository.GetAllPagedAsync(categoriaParameters);
+
+            var metadata = new MetaData()
+            {
+                TotalCount = categorias.TotalCount,
+                PageSize = categorias.PageSize,
+                CurrentPage = categorias.CurrentPage,
+                TotalPages = categorias.TotalPages,
+                HasNext = categorias.HasNext,
+                HasPrevious = categorias.HasPrevious
+            };
+
+            var detailsCategoriaDtos = _mapper.Map<IEnumerable<DetailsCategoriaDto>>(categorias);
+
+            var tuplaRetornoService = (metadata, detailsCategoriaDtos);
+
+            return tuplaRetornoService;
         }
 
         public async Task<DetailsCategoriaDto?> GetCategoriaByIdAsync(int id)

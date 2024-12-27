@@ -8,6 +8,8 @@ using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Domain.Entities;
 using ProductCatalogService.Application.Exceptions;
 using ProductCatalogService.Application.Mapping;
+using ProductCatalogService.Domain.Pagination;
+using ProductCatalogService.Domain.ValueObjects;
 
 namespace ProductCatalogService.Application.Tests
 {
@@ -107,34 +109,53 @@ namespace ProductCatalogService.Application.Tests
         }
 
         [Fact]
-        public async Task ObtemTodasAsCategoriasAtivas_QuandoBemSucedido_RetornaTodasCategoriasAtivas()
+        public async Task ObtemTodasAsCategoriasAtivasPaginadas_QuandoBemSucedido_RetornaTodasCategoriasAtivasPaginadas()
         {
             //Arrange
-            List<Categoria> categorias = new Fixture().CreateMany<Categoria>().ToList();
+            CategoriaParameters categoriaParameters = new()
+            {
+                PageSize = 5
+            };
+            List<Categoria> listaCategorias = new Fixture().CreateMany<Categoria>().ToList();
+
+            PagedList<Categoria> pagedListCategorias = PagedList<Categoria>
+                .ToPagedList(listaCategorias.AsQueryable(), 
+                categoriaParameters.PageNumber, 
+                categoriaParameters.PageSize);
 
             Mock<ICategoriaRepository> mock = new Mock<ICategoriaRepository>();
-            mock.Setup(r => r.GetAllAsync()).ReturnsAsync(categorias);
+            mock.Setup(r => r.GetAllPagedAsync(It.IsAny<CategoriaParameters>())).ReturnsAsync(pagedListCategorias);
+
             ICategoriaRepository repository = mock.Object;
 
             CategoriaService service = new CategoriaService(repository, _mapper);
 
             //Act 
-            List<DetailsCategoriaDto>? categoriasDtos = await service.GetAllCategoriasAtivasAsync();
+            (MetaData, IEnumerable<DetailsCategoriaDto>) serviceReturn = await service.GetAllCategoriasAtivasPagedAsync(categoriaParameters);
 
-            //Assert
-            categoriasDtos.ShouldNotBeNull();
-            categoriasDtos.Count.ShouldBe(categorias.Count);
+            //Assert 
+            var metadata = serviceReturn.Item1;
+            var detailsCategorias = serviceReturn.Item2;
 
-            categoriasDtos = categoriasDtos.OrderBy(c => c.Nome).ToList();
-            categorias = categorias.OrderBy(c => c.Nome).ToList();
+            metadata.ShouldNotBeNull();
+            detailsCategorias.ShouldNotBeNull();
 
-            for(int i = 0; i < categorias.Count; i++)
+            metadata.CurrentPage.ShouldBe(categoriaParameters.PageNumber);
+            metadata.PageSize.ShouldBe(categoriaParameters.PageSize);
+            metadata.HasNext.ShouldBeFalse();
+            metadata.HasPrevious.ShouldBeFalse();
+
+            detailsCategorias.Count().ShouldBe(listaCategorias.Count());
+
+            listaCategorias = listaCategorias.OrderBy(c => c.CategoriaID).ToList();
+            List<DetailsCategoriaDto> listaDetails = detailsCategorias.OrderBy(c => c.Id).ToList();
+
+            for(int i = 0; i < listaCategorias.Count; i++)
             {
-                categoriasDtos[i].Nome.ShouldBe(categorias[i].Nome);
-                categoriasDtos[i].Descricao.ShouldBe(categorias[i].Descricao);
+                listaDetails[i].Id.ShouldBe(listaCategorias[i].CategoriaID); 
+                listaDetails[i].Nome.ShouldBe(listaCategorias[i].Nome); 
+                listaDetails[i].Descricao.ShouldBe(listaCategorias[i].Descricao); 
             }
-
-            mock.Verify(repo => repo.GetAllAsync(), Times.Once());
         }
 
         [Fact] 

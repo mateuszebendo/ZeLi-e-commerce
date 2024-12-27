@@ -5,20 +5,21 @@ using ProductCatalogService.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using AutoFixture;
 using Shouldly;
+using ProductCatalogService.Domain.Pagination;
 
 namespace ProductCatalogService.Infra.Tests
 {
     public class ProdutoRepositoryTest
     {
-        private readonly ConfigDataBase _context;
+        private readonly AppDbContext _context;
         private readonly ProdutoRepository _repository;
 
         public ProdutoRepositoryTest()
         {
-            var options = new DbContextOptionsBuilder<ConfigDataBase>()
+            var options = new DbContextOptionsBuilder<AppDbContext>()
                     .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                     .Options;
-            _context = new ConfigDataBase(options);
+            _context = new AppDbContext(options);
 
             _repository = new ProdutoRepository(_context);
         }
@@ -132,8 +133,13 @@ namespace ProductCatalogService.Infra.Tests
             }
             await _context.SaveChangesAsync();
 
+            ProdutoParameters produtoParameters = new()
+            {
+                PageSize = 10
+            };
+
             //Act
-            var resultadoGetAll = await _repository.GetAllAsync();
+            var resultadoGetAll = await _repository.GetAllPagedAsync(produtoParameters);
 
             //Assert
             Assert.NotNull(resultadoGetAll);

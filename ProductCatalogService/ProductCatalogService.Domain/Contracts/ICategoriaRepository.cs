@@ -1,4 +1,5 @@
 ﻿using ProductCatalogService.Domain.Entities;
+using ProductCatalogService.Domain.Pagination;
 
 namespace ProductCatalogService.Domain.Contracts
 {
@@ -6,7 +7,8 @@ namespace ProductCatalogService.Domain.Contracts
     {
         Task<Categoria> AddAsync(Categoria Categoria);
         Task<Categoria> GetByIdAsync(int id);
-        Task<List<Categoria>> GetAllAsync();
+        Task<IEnumerable<Categoria>> GetAllAsync();
+        Task<PagedList<Categoria>> GetAllPagedAsync(CategoriaParameters categoriaParameters);
         Task<Categoria> UpdateAsync (Categoria Categoria, int id);
         Task<Categoria> RemoveAsync(int id);
     }

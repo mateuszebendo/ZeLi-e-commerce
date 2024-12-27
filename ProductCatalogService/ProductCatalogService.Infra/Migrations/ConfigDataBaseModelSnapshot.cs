@@ -9,7 +9,7 @@ using ProductCatalogService.Infra.Data;
 
 namespace ProductCatalogService.Infra.Migrations
 {
-    [DbContext(typeof(ConfigDataBase))]
+    [DbContext(typeof(AppDbContext))]
     partial class ConfigDataBaseModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

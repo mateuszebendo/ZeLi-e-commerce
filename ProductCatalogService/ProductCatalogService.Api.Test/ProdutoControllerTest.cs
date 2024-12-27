@@ -9,6 +9,7 @@ using ProductCatalogService.Application.Contracts;
 using ProductCatalogService.Application.Dtos;
 using ProductCatalogService.Application.Mapping;
 using ProductCatalogService.Domain.Entities;
+using ProductCatalogService.Domain.Pagination;
 
 namespace ProductCatalogService.Api.Test
 {
@@ -141,13 +142,14 @@ namespace ProductCatalogService.Api.Test
         {
             //Arrange
             List<DetailsProdutoDto> produtos = new Fixture().CreateMany<DetailsProdutoDto>().ToList();
+            ProdutoParameters produtoParameters = new();
 
-            _mock.Setup(s => s.GetAllProdutosAtivosAsync()).ReturnsAsync(produtos);
+            _mock.Setup(s => s.GetAllProdutosAtivosAsync(It.IsAny<ProdutoParameters>())).ReturnsAsync(produtos);
 
             ProdutoController controller = new(_mock.Object);
 
             //Act
-            ActionResult<List<DetailsProdutoDto>> result = await controller.GetAllProdutos();
+            ActionResult<List<DetailsProdutoDto>> result = await controller.GetAllProdutos(produtoParameters);
 
             //Assert 
             result.Result.ShouldBeOfType<OkObjectResult>();
@@ -158,7 +160,7 @@ namespace ProductCatalogService.Api.Test
 
             okResult.Value.ShouldBeEquivalentTo(produtos);
 
-            _mock.Verify(s => s.GetAllProdutosAtivosAsync(), Times.Once);
+            _mock.Verify(s => s.GetAllProdutosAtivosAsync(It.IsAny<ProdutoParameters>()), Times.Once);
         }
 
         [Fact]

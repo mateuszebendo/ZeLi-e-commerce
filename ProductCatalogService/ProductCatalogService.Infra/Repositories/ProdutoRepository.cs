@@ -1,15 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Domain.Entities;
+using ProductCatalogService.Domain.Pagination;
 using ProductCatalogService.Infra.Data;
+using System.Linq.Expressions;
 
 namespace ProductCatalogService.Infra.Repositories
 {
     public class ProdutoRepository : IProdutoRepository
     {
-        private readonly ConfigDataBase _context;
+        private readonly AppDbContext _context;
 
-        public ProdutoRepository(ConfigDataBase context) 
+        public ProdutoRepository(AppDbContext context) 
         {
             _context = context;
         }
@@ -33,11 +35,32 @@ namespace ProductCatalogService.Infra.Repositories
                 throw new Exception("Erro interno ao salvar o produto.", ex);
             }
         }
-        public async Task<List<Produto>> GetAllAsync()
+        public async Task<IEnumerable<Produto>> GetAllAsync()
         {
             try
             {
-                var produtos = await _context.Produtos.ToListAsync<Produto>();
+                var produtos = await _context
+                    .Produtos
+                    .ToListAsync<Produto>();
+
+                return produtos;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro interno ao recuperar os produtos.", ex);
+            }
+        }
+
+        public async Task<List<Produto>> GetAllPagedAsync(ProdutoParameters produtoParameters)
+        {
+            try
+            {
+                var produtos = await _context
+                    .Produtos
+                    .OrderBy(p => p.Nome)
+                    .Skip((produtoParameters.PageNumber - 1) * produtoParameters.PageSize)
+                    .Take(produtoParameters.PageSize)
+                    .ToListAsync<Produto>();
 
                 return produtos;
             }

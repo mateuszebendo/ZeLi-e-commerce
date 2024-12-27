@@ -4,20 +4,21 @@ using ProductCatalogService.Infra.Data;
 using ProductCatalogService.Infra.Repositories;
 using AutoFixture;
 using Shouldly;
+using ProductCatalogService.Domain.Pagination;
 
 namespace ProductCatalogService.Infra.Tests
 {
     public class CategoriaRepositoryTest
     {
-        private readonly ConfigDataBase _context;
+        private readonly AppDbContext _context;
         private readonly CategoriaRepository _repository;
 
         public CategoriaRepositoryTest()
         {
-            var options = new DbContextOptionsBuilder<ConfigDataBase>()
+            var options = new DbContextOptionsBuilder<AppDbContext>()
                     .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                     .Options;
-            _context = new ConfigDataBase(options);
+            _context = new AppDbContext(options);
 
             _repository = new CategoriaRepository(_context);
         }
@@ -38,10 +39,14 @@ namespace ProductCatalogService.Infra.Tests
         }
 
         [Fact]
-        public async Task ObterCategorias_Deve_Retornar_Todas_Categorias()
+        public async Task ObterCategoriasPaginadas_QuandoBemSucedido_RetornaCategoriasPaginadas()
         {
             // Arrange
             List<Categoria> categorias = new Fixture().Build<Categoria>().With(c => c.Ativo, true).CreateMany<Categoria>().ToList();
+            CategoriaParameters categoriaParameters = new ()
+            {
+                PageSize = 5
+            };
             categorias.Count.ShouldBe(3);
 
             foreach (var categoria in categorias)
@@ -51,19 +56,18 @@ namespace ProductCatalogService.Infra.Tests
             await _context.SaveChangesAsync();
 
             // Act 
-            List<Categoria>? getAllResult = await _repository.GetAllAsync();
+            PagedList<Categoria>? getAllResult = await _repository.GetAllPagedAsync(categoriaParameters);
 
             // Assert 
             getAllResult.ShouldNotBeNull();
-            getAllResult.Count.ShouldBe(categorias.Count);
 
             categorias = categorias.OrderBy(c => c.Nome).ToList();
-            getAllResult = getAllResult.OrderBy(c => c.Nome).ToList();
+            List<Categoria> listaOrdenada = getAllResult.OrderBy(c => c.Nome).ToList();
 
             for (int i = 0; i < categorias.Count; i++)
             {
-                getAllResult[i].Nome.ShouldBe(categorias[i].Nome);
-                getAllResult[i].Descricao.ShouldBe(categorias[i].Descricao);
+                listaOrdenada[i].Nome.ShouldBe(categorias[i].Nome);
+                listaOrdenada[i].Descricao.ShouldBe(categorias[i].Descricao);
             }
         }
 

@@ -10,7 +10,7 @@ using ProductCatalogService.Infra.Data;
 
 namespace ProductCatalogService.Infra.Migrations
 {
-    [DbContext(typeof(ConfigDataBase))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20241217185733_InitialMigration")]
     partial class InitialMigration
     {

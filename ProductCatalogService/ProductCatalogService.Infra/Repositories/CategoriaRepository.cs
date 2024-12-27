@@ -1,15 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductCatalogService.Domain.Contracts;
 using ProductCatalogService.Domain.Entities;
+using ProductCatalogService.Domain.Pagination;
 using ProductCatalogService.Infra.Data;
 
 namespace ProductCatalogService.Infra.Repositories
 {
     public class CategoriaRepository : ICategoriaRepository
     {
-        private readonly ConfigDataBase _context;
+        private readonly AppDbContext _context;
 
-        public CategoriaRepository(ConfigDataBase context)
+        public CategoriaRepository(AppDbContext context)
         {
             _context = context;
         }
@@ -35,13 +36,35 @@ namespace ProductCatalogService.Infra.Repositories
             }
         }
 
-        public async Task<List<Categoria>> GetAllAsync()
+        public async Task<IEnumerable<Categoria>> GetAllAsync()
         {
             try
             {
-                var categorias = await _context.Categorias.ToListAsync<Categoria>();
+                var categorias = (await _context.Categorias.ToListAsync<Categoria>()).AsEnumerable();
 
                 return categorias;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro interno ao recuperar os  categorias.", ex);
+            }
+        }
+
+        public async Task<PagedList<Categoria>> GetAllPagedAsync(CategoriaParameters categoriaParameters)
+        {
+            try
+            {
+                var categorias = await _context
+                    .Categorias
+                    .OrderBy(c => c.CategoriaID)
+                    .ToListAsync<Categoria>();
+
+                PagedList<Categoria> categoriasOrdenadas = PagedList<Categoria>
+                    .ToPagedList(categorias.AsQueryable(),
+                    categoriaParameters.PageNumber,
+                    categoriaParameters.PageSize);
+
+                return categoriasOrdenadas;
             }
             catch (Exception ex)
             {

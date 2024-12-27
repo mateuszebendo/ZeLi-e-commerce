@@ -8,6 +8,7 @@ using ProductCatalogService.Application.Dtos;
 using Shouldly;
 using ProductCatalogService.Application.Exceptions;
 using ProductCatalogService.Application.Mapping;
+using ProductCatalogService.Domain.Pagination;
 
 namespace ProductCatalogService.Application.Tests
 {
@@ -122,13 +123,14 @@ namespace ProductCatalogService.Application.Tests
                 .With(p => p.Ativo, true)
                 .CreateMany(4)
                 .ToList();
+            ProdutoParameters produtoParameters = new();
 
-            _mock.Setup(repo => repo.GetAllAsync()).ReturnsAsync(produtos);
+            _mock.Setup(repo => repo.GetAllAsync(It.IsAny<ProdutoParameters>())).ReturnsAsync(produtos);
 
             ProdutoService service = new(_mapper, _mock.Object);
 
             //Act
-            List<DetailsProdutoDto>? produtosDtos = await service.GetAllProdutosAtivosAsync();
+            List<DetailsProdutoDto>? produtosDtos = await service.GetAllProdutosAtivosAsync(produtoParameters);
 
             //Assert 
             produtosDtos.ShouldNotBeNull();
@@ -147,7 +149,7 @@ namespace ProductCatalogService.Application.Tests
                 produtosDtos[i].Categoria.Descricao.ShouldBe(produtos[i].Categoria.Descricao);
             }
 
-            _mock.Verify(repo => repo.GetAllAsync(), Times.Once);
+            _mock.Verify(repo => repo.GetAllAsync(It.IsAny<ProdutoParameters>()), Times.Once);
         }
 
         [Fact]

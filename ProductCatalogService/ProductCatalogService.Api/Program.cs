@@ -18,7 +18,7 @@ builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IProdutoService,  ProdutoService>();
 
-builder.Services.AddDbContextPool<ConfigDataBase>(opt =>
+builder.Services.AddDbContextPool<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DatabaseConnectionString")
 ));
 

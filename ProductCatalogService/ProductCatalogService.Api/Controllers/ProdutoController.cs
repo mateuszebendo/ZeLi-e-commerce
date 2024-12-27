@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using ProductCatalogService.Application.Contracts;
 using ProductCatalogService.Application.Dtos;
+using ProductCatalogService.Domain.Pagination;
 
 namespace ProductCatalogService.Api.Controllers
 {
@@ -43,9 +45,23 @@ namespace ProductCatalogService.Api.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<DetailsProdutoDto>>> GetAllProdutos()
+        public async Task<ActionResult<List<DetailsProdutoDto>>> GetAllProdutos([FromQuery] ProdutoParameters produtoParameters)
         {
-            List<DetailsProdutoDto> produtos = await _service.GetAllProdutosAtivosAsync();
+            List<DetailsProdutoDto> produtos = await _service.GetAllProdutosAtivosAsync(produtoParameters);
+
+            return Ok(produtos);
+        }
+
+        [HttpGet("filter/preco/pagination")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<DetailsProdutoDto>>> GetProdutosFilterPreco([FromQuery] ProdutosFiltroPreco produtosFiltroPreco)
+        {
+            var serviceReturn = await _service.GetProdutosFiltroPrecoAsync(produtosFiltroPreco);
+
+            var metadata = serviceReturn.Item1;
+            var produtos = serviceReturn.Item2;
+
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
 
             return Ok(produtos);
         }

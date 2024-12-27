@@ -9,6 +9,10 @@ using ProductCatalogService.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Shouldly;
 using Microsoft.AspNetCore.Http;
+using ProductCatalogService.Domain.Pagination;
+using ProductCatalogService.Domain.ValueObjects;
+using ProductCatalogService.Application.Services;
+using System.Collections.Generic;
 
 namespace ProductCatalogService.Api.Test
 {
@@ -139,15 +143,37 @@ namespace ProductCatalogService.Api.Test
         [Fact]
         public async Task ObtemTodasAsCategoriasAtivas_QuandoBemSucedido_Retorna200OkComCategorias()
         {
-            //Arrange
-            List<DetailsCategoriaDto> categorias = new Fixture().CreateMany<DetailsCategoriaDto>().ToList();
+            //Arrange 
+            CategoriaParameters categoriaParameters = new()
+            {
+                PageSize = 5
+            };
 
-            _mock.Setup(s => s.GetAllCategoriasAtivasAsync()).ReturnsAsync(categorias);
+            List<Categoria> categorias = new Fixture().CreateMany<Categoria>().ToList();
 
-            CategoriasController controller = new(_mock.Object);
+            PagedList<Categoria> pagedCategorias = PagedList<Categoria>
+                .ToPagedList(categorias.AsQueryable(),
+                categoriaParameters.PageNumber,
+                categoriaParameters.PageSize);
 
-            //Act
-            ActionResult<List<DetailsCategoriaDto>> result = await controller.GetAllCategorias();
+            var metadata = new MetaData()
+            {
+                TotalCount = pagedCategorias.TotalCount,
+                PageSize = pagedCategorias.PageSize,
+                CurrentPage = pagedCategorias.CurrentPage,
+                TotalPages = pagedCategorias.TotalPages,
+                HasNext = pagedCategorias.HasNext,
+                HasPrevious = pagedCategorias.HasPrevious
+            };
+
+            var serviceReturn = (metadata, _mapper.Map<IEnumerable<DetailsCategoriaDto>>(pagedCategorias));
+
+            _mock.Setup(s => s.GetAllCategoriasAtivasPagedAsync(It.IsAny<CategoriaParameters>())).ReturnsAsync(serviceReturn);
+
+            CategoriasController controller = new CategoriasController(_mock.Object);
+
+            //Act 
+            ActionResult<IEnumerable<DetailsCategoriaDto>> result = await controller.GetAllCategoriasPaged(categoriaParameters);
 
             //Assert 
             result.Result.ShouldBeOfType<OkObjectResult>();
@@ -156,9 +182,8 @@ namespace ProductCatalogService.Api.Test
 
             okResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
 
-            okResult.Value.ShouldBeEquivalentTo(categorias);
+            _mock.Verify(s => s.GetAllCategoriasAtivasPagedAsync(It.IsAny<CategoriaParameters>()), Times.Once);
 
-            _mock.Verify(s => s.GetAllCategoriasAtivasAsync(), Times.Once);
         }
 
         [Fact]

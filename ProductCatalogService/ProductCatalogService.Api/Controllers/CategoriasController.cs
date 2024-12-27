@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using ProductCatalogService.Application.Contracts;
 using ProductCatalogService.Application.Dtos;
+using ProductCatalogService.Domain.Pagination;
+using ProductCatalogService.Domain.ValueObjects;
 
 namespace ProductCatalogService.Api.Controllers
 {
@@ -42,11 +45,30 @@ namespace ProductCatalogService.Api.Controllers
             return Ok(categoriaDto);
         }
 
+        [HttpGet("filter/nome/pagination")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<DetailsCategoriaDto>>> GetCategoriasFiltradas([FromQuery] CategoriasFiltroNome categoriasFiltro)
+        {
+            var tuplaRetornoService = await _service.GetCategoriasFiltroNomeAsync(categoriasFiltro);
+
+            MetaData metaData = tuplaRetornoService.Item1;
+            IEnumerable<DetailsCategoriaDto> categorias = tuplaRetornoService.Item2;
+
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metaData));
+
+            return Ok(categorias);
+        }
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<DetailsCategoriaDto>>> GetAllCategorias()
+        public async Task<ActionResult<IEnumerable<DetailsCategoriaDto>>> GetAllCategoriasPaged([FromQuery] CategoriaParameters categoriaParameters)
         {
-            List<DetailsCategoriaDto> categorias = await _service.GetAllCategoriasAtivasAsync();
+            var tuplaRetornoService = await _service.GetAllCategoriasAtivasPagedAsync(categoriaParameters);
+
+            MetaData metaData = tuplaRetornoService.Item1;
+            IEnumerable<DetailsCategoriaDto> categorias = tuplaRetornoService.Item2;
+
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metaData));
 
             return Ok(categorias);
         }
